@@ -1,98 +1,82 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useAction, useMutation, useQuery } from 'convex/react';
+import { useState } from 'react';
+import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { api } from '../../convex/_generated/api';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function ChatScreen() {
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
 
-export default function HomeScreen() {
+  // Mengambil riwayat chat dari backend secara real-time
+  const messages = useQuery(api.messages.list) || [];
+  
+  // Fungsi untuk menyimpan pesan ke database
+  const sendMessage = useMutation(api.messages.send);
+  
+  // Fungsi untuk memanggil AI Gemini
+  const getAI = useAction(api.gemini.getAIPrompt);
+
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+
+    const userText = input;
+    setInput(''); // Kosongkan input segera
+    setLoading(true);
+
+    // 1. Simpan pesan User ke Database
+    await sendMessage({ text: userText, isUser: true });
+
+    try {
+      // 2. Minta jawaban AI
+      const aiResponse = await getAI({ prompt: userText });
+      
+      // 3. Simpan jawaban AI ke Database
+      await sendMessage({ text: aiResponse, isUser: false });
+    } catch (error) {
+      console.error("Gagal memanggil AI:", error);
+      await sendMessage({ text: "Maaf, sepertinya aku sedang kesulitan memproses pikiranmu saat ini.", isUser: false });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <FlatList
+        data={messages}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item }) => (
+          <View style={[styles.bubble, item.isUser ? styles.userBubble : styles.aiBubble]}>
+            <Text style={styles.bubbleText}>{item.text}</Text>
+          </View>
+        )}
+        contentContainerStyle={styles.listContainer}
+      />
+      
+      <View style={styles.inputContainer}>
+        <TextInput 
+          value={input} 
+          onChangeText={setInput} 
+          placeholder="Tulis apa yang kamu rasakan..."
+          style={styles.input}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <TouchableOpacity style={styles.sendButton} onPress={handleSend} disabled={loading}>
+          <Text style={styles.sendButtonText}>{loading ? "..." : "Kirim"}</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  container: { flex: 1, backgroundColor: '#f4f4f9' },
+  listContainer: { padding: 20 },
+  bubble: { padding: 15, borderRadius: 20, marginVertical: 5, maxWidth: '80%' },
+  userBubble: { backgroundColor: '#007AFF', alignSelf: 'flex-end' },
+  aiBubble: { backgroundColor: '#E5E5EA', alignSelf: 'flex-start' },
+  bubbleText: { color: 'white', fontSize: 16 },
+  inputContainer: { flexDirection: 'row', padding: 10, backgroundColor: 'white' },
+  input: { flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 20, paddingHorizontal: 15, height: 40 },
+  sendButton: { marginLeft: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: '#007AFF', paddingHorizontal: 20, borderRadius: 20 },
+  sendButtonText: { color: 'white', fontWeight: 'bold' }
 });
