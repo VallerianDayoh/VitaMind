@@ -10,6 +10,7 @@ import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Colors, Typography, Spacing } from '../../constants/theme';
+import { processMoodChartData, processSleepChartData, processStressChartData } from '../../utils/chartHelpers';
 
 type TimeFilter = 'week' | 'month';
 
@@ -18,8 +19,6 @@ interface ChartData {
   value: number;
   annotation?: string;
 }
-
-const MOOD_SCORE: Record<string, number> = { rad: 5, good: 4, meh: 3, bad: 2, awful: 1 };
 
 // ── Variables ──────────────────────────────────────────────
 const CHART_HEIGHT = 120;
@@ -40,57 +39,39 @@ export default function ReportScreen() {
   const sleepLogs = useQuery(api.sleepLogs.getByUser, convexUserId ? { userId } : "skip") || [];
   const stressLogs = useQuery(api.stressLogs.getByUser, convexUserId ? { userId } : "skip") || [];
 
-  // Generate dynamic chart data from logs (last 7 logs)
-  const formatDays = (logs: any[], valueExtractor: (log: any) => number, annotator?: (log: any) => string | undefined): ChartData[] => {
-    return [...logs].slice(0, 7).reverse().map(log => {
-      // sleepLog uses log.date for string dates, others use log.timestamp
-      const validDate = log.timestamp ? log.timestamp : log.date ? new Date(log.date).getTime() : log._creationTime;
-      return {
-        label: new Date(validDate).toLocaleDateString('id-ID', { weekday: 'short' }),
-        value: valueExtractor(log),
-        annotation: annotator ? annotator(log) : undefined
-      };
-    });
-  };
+  // Process & aggregate chart data (one point per day)
+  const dynamicMoodData = processMoodChartData(moodLogs);
+  const dynamicSleepData = processSleepChartData(sleepLogs);
+  const dynamicStressData = processStressChartData(stressLogs);
 
-  const dynamicMoodData = formatDays(moodLogs, m => MOOD_SCORE[m.mood] || 3);
-  const dynamicSleepData = formatDays(sleepLogs, s => s.durationInHours);
-  const dynamicStressData = formatDays(stressLogs, s => s.level, s => s.note || undefined);
-
-  // Gemini Insight State
+  // Gemini Insight State (Manual Trigger)
   const fetchInsight = useAction(api.gemini.generateInsight);
   const [insightText, setInsightText] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  useEffect(() => {
-    async function getInsight() {
-      if (!moodLogs || !sleepLogs || !stressLogs || !user?.name) return;
-      if (moodLogs.length === 0 && sleepLogs.length === 0 && stressLogs.length === 0) {
-        setInsightText("Belum ada data check-in terbaru. Usahakan untuk rutin membagikan kabarmu tiap hari ya!");
-        return;
-      }
-
-      setIsGenerating(true);
-      try {
-        const text = await fetchInsight({
-          userName: user.name.split(' ')[0],
-          moodLogs: moodLogs.slice(0, 7),
-          sleepLogs: sleepLogs.slice(0, 7),
-          stressLogs: stressLogs.slice(0, 7),
-        });
-        setInsightText(text);
-      } catch (err) {
-        console.error("Insight error:", err);
-        setInsightText("Gagal memuat analisis khusus dari Vita. Cek kembali koneksi internetmu.");
-      } finally {
-        setIsGenerating(false);
-      }
+  async function handleGenerateInsight() {
+    if (!moodLogs || !sleepLogs || !stressLogs || !user?.name) return;
+    if (moodLogs.length === 0 && sleepLogs.length === 0 && stressLogs.length === 0) {
+      setInsightText("Belum ada data check-in terbaru. Usahakan untuk rutin membagikan kabarmu tiap hari ya!");
+      return;
     }
 
-    if (!insightText && !isGenerating && moodLogs.length > 0) {
-      getInsight();
+    setIsGenerating(true);
+    try {
+      const text = await fetchInsight({
+        userName: user.name.split(' ')[0],
+        moodLogs: moodLogs.slice(0, 7),
+        sleepLogs: sleepLogs.slice(0, 7),
+        stressLogs: stressLogs.slice(0, 7),
+      });
+      setInsightText(text);
+    } catch (err) {
+      console.error("Insight error:", err);
+      setInsightText("Gagal memuat analisis dari Vita. Mungkin terlalu banyak request, silakan tunggu sebentar dan coba lagi nanti.");
+    } finally {
+      setIsGenerating(false);
     }
-  }, [moodLogs, sleepLogs, stressLogs, user]);
+  }
 
   const isHighRisk = stressLogs && stressLogs.length > 0 && stressLogs[0].level >= 12; // Risk condition
   
@@ -160,10 +141,19 @@ export default function ReportScreen() {
               <ActivityIndicator size="small" color={Colors.primary} />
               <Text style={[styles.insightText, { fontStyle: 'italic' }]}>Vita sedang membaca datamu...</Text>
             </View>
+          ) : insightText ? (
+            <Text style={styles.insightText}>{insightText}</Text>
           ) : (
-            <Text style={styles.insightText}>
-              {insightText || "Data siap."}
-            </Text>
+            <View>
+              <Text style={styles.insightText}>
+                Dapatkan analisis mingguan khusus untukmu berdasarkan rutinitas tidur, mood, dan tingkat stres yang telah kamu bagikan.
+              </Text>
+              <Button 
+                title="Generate Analisis Vita" 
+                onPress={handleGenerateInsight}
+                style={{ marginTop: 12 }} 
+              />
+            </View>
           )}
         </Card>
 

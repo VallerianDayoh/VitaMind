@@ -19,20 +19,15 @@ export const chat = action({
     conversationHistory: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) throw new Error("GEMINI_API_KEY belum diset di Convex environment!");
+    const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY; // Fallback for env names
+    if (!apiKey) throw new Error("API Key belum diset di Convex environment!");
 
-    // Build the conversation with system context
-    const contents = [];
+    const messages = [];
 
-    // System instruction as initial user-model exchange
-    contents.push({
-      role: "user",
-      parts: [{ text: `[System Instruction] ${VITA_SYSTEM_PROMPT}` }],
-    });
-    contents.push({
-      role: "model",
-      parts: [{ text: "Saya mengerti, saya akan berperan sebagai Vita sesuai panduan tersebut. Silakan mulai percakapan." }],
+    // System instruction
+    messages.push({
+      role: "system",
+      content: VITA_SYSTEM_PROMPT
     });
 
     // Add conversation history if available
@@ -40,37 +35,33 @@ export const chat = action({
       const lines = args.conversationHistory.split("\n");
       for (const line of lines) {
         if (line.startsWith("User: ")) {
-          contents.push({ role: "user", parts: [{ text: line.substring(6) }] });
+          messages.push({ role: "user", content: line.substring(6) });
         } else if (line.startsWith("Vita: ")) {
-          contents.push({ role: "model", parts: [{ text: line.substring(6) }] });
+          messages.push({ role: "assistant", content: line.substring(6) });
         }
       }
     }
 
     // Add current message
-    contents.push({
+    messages.push({
       role: "user",
-      parts: [{ text: args.userMessage }],
+      content: args.userMessage,
     });
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json" 
+        },
         body: JSON.stringify({
-          contents,
-          generationConfig: {
-            temperature: 0.8,
-            topP: 0.9,
-            maxOutputTokens: 2048,
-          },
-          safetySettings: [
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-          ],
+          model: "llama-3.1-8b-instant", // Groq fast model
+          messages,
+          temperature: 0.8,
+          max_tokens: 280,
+          top_p: 0.9
         }),
       }
     );
@@ -78,18 +69,16 @@ export const chat = action({
     const data = await response.json();
 
     if (data.error) {
-      console.error("Gemini Error:", data.error);
+      console.error("Groq Error:", data.error);
       return "Maaf, Vita sedang mengalami gangguan teknis. Coba lagi nanti ya 💛";
     }
 
-    if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content) {
+    if (!data.choices || data.choices.length === 0 || !data.choices[0].message) {
       console.error("Invalid response:", JSON.stringify(data));
       return "Maaf, aku belum bisa memproses pesanmu saat ini. Coba ulangi lagi ya 🌱";
     }
 
-    // Join all parts in case the response is split
-    const fullText = (data.candidates[0].content.parts.map((p: any) => p.text).join("")) as string;
-    return fullText;
+    return data.choices[0].message.content as string;
   },
 });
 
@@ -101,8 +90,8 @@ export const generateInsight = action({
     stressLogs: v.array(v.any()),
   },
   handler: async (ctx, args) => {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) throw new Error("GEMINI_API_KEY belum diset!");
+    const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("API Key belum diset!");
 
     // Optimalisasi Payload Data: Hanya ambil core value
     const moodScores: Record<string, number> = { rad: 5, good: 4, meh: 3, bad: 2, awful: 1 };
@@ -110,8 +99,8 @@ export const generateInsight = action({
     const cleanSleep = args.sleepLogs.map((l: any) => l.durationInHours);
     const cleanStress = args.stressLogs.map((l: any) => ({ level: l.level, dl: l.hasDeadline }));
 
-    const prompt = `Kamu adalah analis kesehatan mental dan wellbeing untuk mahasiswa. 
-Tugasmu: Buat satu paragraf singkat (maksimal 3-4 kalimat) berisi insight dari data check-in mingguan user bernama ${args.userName}.
+    const systemPrompt = `Kamu adalah analis kesehatan mental dan wellbeing untuk mahasiswa.`;
+    const userPrompt = `Tugasmu: Buat satu paragraf singkat (maksimal 3-4 kalimat) berisi insight dari data check-in mingguan user bernama ${args.userName}.
 Pilih kata-kata yang hangat, empatik, dan analitis. Jika tidur < 7 jam atau stres tinggi, berikan saran praktis (misal: kurangi kafein, peregangan) dan hubungkan empatimu dengan kemungkinan padatnya beban akademik, deadline, atau UKM. Jika tren data baik, berikan apresiasi atas konsistensinya.
 
 Data 7 hari terakhir (Berurutan):
@@ -122,23 +111,31 @@ Data 7 hari terakhir (Berurutan):
 Tulis HANYA paragraf analisisnya, langsung sapa namanya, tanpa pembuka/penutup basa-basi.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json" 
+        },
         body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+          model: "llama-3.1-8b-instant", // Groq fast model
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
+          temperature: 0.7, 
+          max_tokens: 350
         }),
       }
     );
 
     const data = await response.json();
-    if (data.error || !data.candidates || data.candidates.length === 0) {
-      console.error("Gemini Insight Error:", data.error || data);
+    if (data.error || !data.choices || data.choices.length === 0) {
+      console.error("Groq Insight Error:", data.error || data);
       return "Data belum cukup untuk dianalisis minggu ini. Tetap semangat dan usahakan check-in rutin ya!";
     }
 
-    return (data.candidates[0].content.parts.map((p: any) => p.text).join("")) as string;
+    return data.choices[0].message.content as string;
   },
 });
