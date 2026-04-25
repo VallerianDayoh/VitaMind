@@ -104,14 +104,20 @@ export const generateInsight = action({
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY belum diset!");
 
-    const prompt = `Kamu adalah analis kesehatan mental dan wellbeing. 
-Tugasmu: Buat satu paragraf singkat (maksimal 3-4 kalimat) berisi insight atau kesimpulan dari data check-in mingguan user bernama ${args.userName}.
-Pilih kata-kata yang hangat, empatik, namun tetap analitis. Jika tidurnya kurang (< 7 jam/hari) atau stress tinggi, berikan saran praktis seperti "coba kurangi kafein" atau "luangkan waktu jalan kaki 15 menit". Jika baik, berikan apresiasi.
+    // Optimalisasi Payload Data: Hanya ambil core value
+    const moodScores: Record<string, number> = { rad: 5, good: 4, meh: 3, bad: 2, awful: 1 };
+    const cleanMood = args.moodLogs.map((l: any) => moodScores[l.mood] || 3);
+    const cleanSleep = args.sleepLogs.map((l: any) => l.durationInHours);
+    const cleanStress = args.stressLogs.map((l: any) => ({ level: l.level, dl: l.hasDeadline }));
 
-Data 7 hari terakhir:
-- Mood: ${JSON.stringify(args.moodLogs)}
-- Tidur (jam): ${JSON.stringify(args.sleepLogs)}
-- Stress: ${JSON.stringify(args.stressLogs)}
+    const prompt = `Kamu adalah analis kesehatan mental dan wellbeing untuk mahasiswa. 
+Tugasmu: Buat satu paragraf singkat (maksimal 3-4 kalimat) berisi insight dari data check-in mingguan user bernama ${args.userName}.
+Pilih kata-kata yang hangat, empatik, dan analitis. Jika tidur < 7 jam atau stres tinggi, berikan saran praktis (misal: kurangi kafein, peregangan) dan hubungkan empatimu dengan kemungkinan padatnya beban akademik, deadline, atau UKM. Jika tren data baik, berikan apresiasi atas konsistensinya.
+
+Data 7 hari terakhir (Berurutan):
+- Tren Mood (Skala 1-Awful s/d 5-Rad): ${JSON.stringify(cleanMood)}
+- Tren Tidur (Jam/hari): ${JSON.stringify(cleanSleep)}
+- Tren Stress (Level dan ada deadline): ${JSON.stringify(cleanStress)}
 
 Tulis HANYA paragraf analisisnya, langsung sapa namanya, tanpa pembuka/penutup basa-basi.`;
 
