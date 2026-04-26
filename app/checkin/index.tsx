@@ -1,29 +1,31 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { useMutation } from 'convex/react';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Switch,
   Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  Easing,
 } from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
-import { useMutation } from 'convex/react';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
+import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
+import { Colors, Spacing, Typography } from '../../constants/theme';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
-import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Colors, Typography, Spacing } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
 import { MoodType } from '../../types';
 
@@ -60,8 +62,16 @@ const ACTIVITIES: { key: string; label: string; icon: keyof typeof MaterialCommu
   { key: 'other', label: 'Lainnya', icon: 'target' },
 ];
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
-const MINS = ['00', '15', '30', '45'];
+// Helper to create a Date with a specific hour:minute (date is irrelevant, only time matters)
+const makeTime = (h: number, m: number): Date => {
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d;
+};
+
+// Format Date → "HH:mm"
+const fmt = (d: Date): string =>
+  `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
 // ── Component ──────────────────────────────────────────────
 
@@ -78,11 +88,11 @@ export default function UnifiedCheckinScreen() {
   const [mood, setMood] = useState<MoodType | null>(null);
   const [moodNote, setMoodNote] = useState('');
 
-  // Sleep state
-  const [bedH, setBedH] = useState('22');
-  const [bedM, setBedM] = useState('30');
-  const [wakeH, setWakeH] = useState('06');
-  const [wakeM, setWakeM] = useState('00');
+  // Sleep state (Date-based for native picker)
+  const [sleepTime, setSleepTime] = useState<Date>(() => makeTime(23, 0));
+  const [wakeTime, setWakeTime] = useState<Date>(() => makeTime(6, 0));
+  const [showSleepPicker, setShowSleepPicker] = useState(false);
+  const [showWakePicker, setShowWakePicker] = useState(false);
   const [sleepQuality, setSleepQuality] = useState<SleepQuality | null>(null);
 
   // Stress state
@@ -115,12 +125,23 @@ export default function UnifiedCheckinScreen() {
 
   // Computed sleep duration
   const sleepDuration = useMemo(() => {
-    const bedMins = parseInt(bedH) * 60 + parseInt(bedM);
-    const wakeMins = parseInt(wakeH) * 60 + parseInt(wakeM);
+    const bedMins = sleepTime.getHours() * 60 + sleepTime.getMinutes();
+    const wakeMins = wakeTime.getHours() * 60 + wakeTime.getMinutes();
     let diff = wakeMins - bedMins;
     if (diff <= 0) diff += 24 * 60;
     return { h: Math.floor(diff / 60), m: diff % 60, total: diff / 60 };
-  }, [bedH, bedM, wakeH, wakeM]);
+  }, [sleepTime, wakeTime]);
+
+  // Native picker handlers
+  const onSleepChange = useCallback((_e: DateTimePickerEvent, date?: Date) => {
+    if (Platform.OS === 'android') setShowSleepPicker(false);
+    if (date) setSleepTime(date);
+  }, []);
+
+  const onWakeChange = useCallback((_e: DateTimePickerEvent, date?: Date) => {
+    if (Platform.OS === 'android') setShowWakePicker(false);
+    if (date) setWakeTime(date);
+  }, []);
 
   const handleSave = async () => {
     if (!convexUserId) {
@@ -145,8 +166,8 @@ export default function UnifiedCheckinScreen() {
           userId: uid,
           durationInHours: Math.round(sleepDuration.total * 10) / 10,
           quality: sleepQuality,
-          bedTime: `${bedH}:${bedM}`,
-          wakeTime: `${wakeH}:${wakeM}`,
+          bedTime: fmt(sleepTime),
+          wakeTime: fmt(wakeTime),
           date: new Date().toISOString().split('T')[0],
         }));
       }
@@ -180,44 +201,7 @@ export default function UnifiedCheckinScreen() {
 
   // ── Render Helpers ───────────────────────────────────────
 
-  const renderTimePicker = (
-    label: string,
-    h: string,
-    setH: (v: string) => void,
-    m: string,
-    setM: (v: string) => void,
-  ) => (
-    <View style={styles.timeBlock}>
-      <Text style={styles.timeLabel}>{label}</Text>
-      <View style={styles.timeRow}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.chipRow}>
-            {HOURS.map((v) => (
-              <TouchableOpacity
-                key={`${label}-h-${v}`}
-                style={[styles.timeChip, h === v && styles.timeChipActive]}
-                onPress={() => setH(v)}
-              >
-                <Text style={[styles.timeChipText, h === v && styles.timeChipTextActive]}>{v}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
-        <Text style={styles.timeColon}>:</Text>
-        <View style={styles.chipRow}>
-          {MINS.map((v) => (
-            <TouchableOpacity
-              key={`${label}-m-${v}`}
-              style={[styles.timeChip, m === v && styles.timeChipActive]}
-              onPress={() => setM(v)}
-            >
-              <Text style={[styles.timeChipText, m === v && styles.timeChipTextActive]}>{v}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-    </View>
-  );
+  // Tap-to-Edit time pickers removed – inline digital clock UI below
 
   return (
     <ScreenWrapper>
@@ -266,13 +250,64 @@ export default function UnifiedCheckinScreen() {
         <Card>
           <Text style={styles.cardTitle}>Kualitas istirahatmu semalam?</Text>
 
-          {renderTimePicker('Tidur', bedH, setBedH, bedM, setBedM)}
-          {renderTimePicker('Bangun', wakeH, setWakeH, wakeM, setWakeM)}
+          {/* Digital Clock – Tap to Edit */}
+          <View style={styles.clockRow}>
+            {/* Tidur Column */}
+            <View style={styles.clockCol}>
+              <View style={styles.clockLabelRow}>
+                <Ionicons name="moon" size={14} color="rgba(255,255,255,0.6)" />
+                <Text style={styles.clockLabel}>Tidur</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.clockCard}
+                activeOpacity={0.7}
+                onPress={() => setShowSleepPicker(true)}
+              >
+                <Text style={styles.clockText}>{fmt(sleepTime)}</Text>
+              </TouchableOpacity>
+            </View>
 
+            {/* Bangun Column */}
+            <View style={styles.clockCol}>
+              <View style={styles.clockLabelRow}>
+                <Ionicons name="sunny" size={14} color="rgba(255,255,255,0.6)" />
+                <Text style={styles.clockLabel}>Bangun</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.clockCard}
+                activeOpacity={0.7}
+                onPress={() => setShowWakePicker(true)}
+              >
+                <Text style={styles.clockText}>{fmt(wakeTime)}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Native Time Pickers */}
+          {showSleepPicker && (
+            <DateTimePicker
+              value={sleepTime}
+              mode="time"
+              is24Hour={true}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={onSleepChange}
+            />
+          )}
+          {showWakePicker && (
+            <DateTimePicker
+              value={wakeTime}
+              mode="time"
+              is24Hour={true}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={onWakeChange}
+            />
+          )}
+
+          {/* Duration Badge */}
           <View style={styles.sleepBadge}>
-            <Ionicons name="moon" size={18} color={Colors.primaryGlow} />
+            <Ionicons name="time-outline" size={16} color={Colors.primaryGlow} />
             <Text style={styles.sleepBadgeText}>
-              Kamu tidur ~
+              Kamu tidur selama{' '}
               <Text style={styles.sleepBold}>
                 {sleepDuration.h} jam{sleepDuration.m > 0 ? ` ${sleepDuration.m} menit` : ''}
               </Text>
@@ -328,7 +363,6 @@ export default function UnifiedCheckinScreen() {
           <View style={styles.toggleRow}>
             <View style={styles.toggleTextWrap}>
               <Text style={styles.toggleTitle}>Ada deadline atau ujian minggu ini?</Text>
-              <Text style={styles.toggleSub}>Konteks akademik UNKLAB</Text>
             </View>
             <Switch
               value={hasDeadline}
@@ -475,40 +509,48 @@ const styles = StyleSheet.create({
     minHeight: 72,
   },
 
-  // ── Sleep ────────────────────────────────────────────
-  timeBlock: { marginBottom: Spacing.md },
-  timeLabel: {
-    fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.medium,
-    color: Colors.textSecondary,
+  // ── Sleep – Digital Clock ────────────────────────────
+  clockRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+  clockCol: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  clockLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     marginBottom: Spacing.xs,
   },
-  timeRow: { flexDirection: 'row', alignItems: 'center' },
-  timeColon: {
-    fontSize: Typography.sizes.xl,
+  clockLabel: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.medium,
+    color: 'rgba(255,255,255,0.6)',
+  },
+  clockCard: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.lg,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(179,136,235,0.25)',
+  },
+  clockText: {
+    fontSize: 32,
     fontWeight: Typography.weights.bold,
-    color: Colors.textPrimary,
-    marginHorizontal: Spacing.sm,
+    color: '#FFFFFF',
+    letterSpacing: 2,
+    textShadowColor: Colors.primaryGlow,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 12,
   },
   chipRow: { flexDirection: 'row', gap: Spacing.xs },
-  timeChip: {
-    paddingVertical: 6,
-    paddingHorizontal: Spacing.md,
-    borderRadius: 10,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  timeChipActive: {
-    backgroundColor: Colors.primaryGlow,
-    borderColor: Colors.primaryGlow,
-  },
-  timeChipText: {
-    fontSize: Typography.sizes.md,
-    fontWeight: Typography.weights.medium,
-    color: Colors.textPrimary,
-  },
-  timeChipTextActive: { color: '#FFF' },
 
   sleepBadge: {
     flexDirection: 'row',
@@ -635,7 +677,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryGlow,
     borderColor: Colors.primaryGlow,
   },
-  activityIcon: { },
+  activityIcon: {},
   activityLabel: { fontSize: Typography.sizes.sm, color: Colors.textPrimary },
 
   durationRow: {

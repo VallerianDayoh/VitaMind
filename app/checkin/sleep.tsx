@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation } from 'convex/react';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Platform } from 'react-native';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
@@ -11,8 +12,16 @@ import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { useAuthStore } from '../../store/authStore';
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
-const MINUTES = ['00', '15', '30', '45'];
+// Helper to create a Date with a specific hour:minute
+const makeTime = (h: number, m: number): Date => {
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d;
+};
+
+// Format Date → "HH:mm"
+const fmt = (d: Date): string =>
+  `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
 type SleepQuality = 'excellent' | 'good' | 'fair' | 'poor';
 const QUALITIES: { value: SleepQuality; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
@@ -27,21 +36,31 @@ export default function SleepCheckinScreen() {
   const convexUserId = useAuthStore((s) => s.convexUserId);
   const addSleepLog = useMutation(api.sleepLogs.add);
 
-  const [bedH, setBedH] = useState('22');
-  const [bedM, setBedM] = useState('30');
-  const [wakeH, setWakeH] = useState('06');
-  const [wakeM, setWakeM] = useState('00');
+  const [sleepTime, setSleepTime] = useState<Date>(() => makeTime(23, 0));
+  const [wakeTime, setWakeTime] = useState<Date>(() => makeTime(6, 0));
+  const [showSleepPicker, setShowSleepPicker] = useState(false);
+  const [showWakePicker, setShowWakePicker] = useState(false);
   const [quality, setQuality] = useState<SleepQuality | null>(null);
 
   const duration = useMemo(() => {
-    const bedMins = parseInt(bedH) * 60 + parseInt(bedM);
-    const wakeMins = parseInt(wakeH) * 60 + parseInt(wakeM);
+    const bedMins = sleepTime.getHours() * 60 + sleepTime.getMinutes();
+    const wakeMins = wakeTime.getHours() * 60 + wakeTime.getMinutes();
     let diff = wakeMins - bedMins;
     if (diff <= 0) diff += 24 * 60;
     const h = Math.floor(diff / 60);
     const m = diff % 60;
     return { h, m, total: diff / 60 };
-  }, [bedH, bedM, wakeH, wakeM]);
+  }, [sleepTime, wakeTime]);
+
+  const onSleepChange = React.useCallback((_e: DateTimePickerEvent, date?: Date) => {
+    if (Platform.OS === 'android') setShowSleepPicker(false);
+    if (date) setSleepTime(date);
+  }, []);
+
+  const onWakeChange = React.useCallback((_e: DateTimePickerEvent, date?: Date) => {
+    if (Platform.OS === 'android') setShowWakePicker(false);
+    if (date) setWakeTime(date);
+  }, []);
 
   const handleSave = async () => {
     if (!quality || !convexUserId) return;
@@ -50,8 +69,8 @@ export default function SleepCheckinScreen() {
         userId: convexUserId as Id<"users">,
         durationInHours: Math.round(duration.total * 10) / 10,
         quality,
-        bedTime: `${bedH}:${bedM}`,
-        wakeTime: `${wakeH}:${wakeM}`,
+        bedTime: fmt(sleepTime),
+        wakeTime: fmt(wakeTime),
         date: new Date().toISOString().split('T')[0],
       });
       router.back();
@@ -68,21 +87,57 @@ export default function SleepCheckinScreen() {
 
         {/* Time pickers */}
         <Card>
-          <Text style={styles.label}>Jam Tidur</Text>
-          <View style={styles.pickerRow}>
-            <ScrollSelector values={HOURS} selected={bedH} onSelect={setBedH} />
-            <Text style={styles.colon}>:</Text>
-            <ScrollSelector values={MINUTES} selected={bedM} onSelect={setBedM} />
-          </View>
-        </Card>
+          <View style={styles.clockRow}>
+            {/* Tidur Column */}
+            <View style={styles.clockCol}>
+              <View style={styles.clockLabelRow}>
+                <Ionicons name="moon" size={14} color="rgba(255,255,255,0.6)" />
+                <Text style={styles.clockLabel}>Tidur</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.clockCard}
+                activeOpacity={0.7}
+                onPress={() => setShowSleepPicker(true)}
+              >
+                <Text style={styles.clockText}>{fmt(sleepTime)}</Text>
+              </TouchableOpacity>
+            </View>
 
-        <Card>
-          <Text style={styles.label}>Jam Bangun</Text>
-          <View style={styles.pickerRow}>
-            <ScrollSelector values={HOURS} selected={wakeH} onSelect={setWakeH} />
-            <Text style={styles.colon}>:</Text>
-            <ScrollSelector values={MINUTES} selected={wakeM} onSelect={setWakeM} />
+            {/* Bangun Column */}
+            <View style={styles.clockCol}>
+              <View style={styles.clockLabelRow}>
+                <Ionicons name="sunny" size={14} color="rgba(255,255,255,0.6)" />
+                <Text style={styles.clockLabel}>Bangun</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.clockCard}
+                activeOpacity={0.7}
+                onPress={() => setShowWakePicker(true)}
+              >
+                <Text style={styles.clockText}>{fmt(wakeTime)}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
+
+          {/* Native Time Pickers */}
+          {showSleepPicker && (
+            <DateTimePicker
+              value={sleepTime}
+              mode="time"
+              is24Hour={true}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={onSleepChange}
+            />
+          )}
+          {showWakePicker && (
+            <DateTimePicker
+              value={wakeTime}
+              mode="time"
+              is24Hour={true}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={onWakeChange}
+            />
+          )}
         </Card>
 
         {/* Duration preview */}
@@ -128,34 +183,7 @@ export default function SleepCheckinScreen() {
   );
 }
 
-// ── Scroll Selector (mini time picker) ─────────────────────
-
-interface ScrollSelectorProps {
-  values: string[];
-  selected: string;
-  onSelect: (v: string) => void;
-}
-
-const ScrollSelector: React.FC<ScrollSelectorProps> = ({ values, selected, onSelect }) => (
-  <ScrollView
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    contentContainerStyle={styles.selectorContainer}
-  >
-    {values.map((v) => {
-      const active = v === selected;
-      return (
-        <TouchableOpacity
-          key={v}
-          style={[styles.selectorItem, active && styles.selectorItemActive]}
-          onPress={() => onSelect(v)}
-        >
-          <Text style={[styles.selectorText, active && styles.selectorTextActive]}>{v}</Text>
-        </TouchableOpacity>
-      );
-    })}
-  </ScrollView>
-);
+// Scroll Selector and its types were removed
 
 // ── Styles ─────────────────────────────────────────────────
 
@@ -169,21 +197,45 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     marginBottom: Spacing.lg,
   },
-  label: {
-    fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.medium,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
-  },
-  pickerRow: {
+  // ── Sleep – Digital Clock ────────────────────────────
+  clockRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
+  },
+  clockCol: {
+    flex: 1,
     alignItems: 'center',
   },
-  colon: {
-    fontSize: Typography.sizes.xxl,
+  clockLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: Spacing.xs,
+  },
+  clockLabel: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.medium,
+    color: 'rgba(255,255,255,0.6)',
+  },
+  clockCard: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.lg,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(179,136,235,0.25)',
+  },
+  clockText: {
+    fontSize: 32,
     fontWeight: Typography.weights.bold,
-    color: Colors.textPrimary,
-    marginHorizontal: Spacing.sm,
+    color: '#FFFFFF',
+    letterSpacing: 2,
+    textShadowColor: Colors.primaryGlow,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 12,
   },
 
   // Duration
@@ -230,27 +282,6 @@ const styles = StyleSheet.create({
   },
   qualityIcon: { fontSize: 28, marginBottom: Spacing.xs },
   qualityLabel: { fontSize: Typography.sizes.xs, color: Colors.textSecondary, textAlign: 'center' },
-
-  // Scroll selector
-  selectorContainer: { gap: Spacing.xs },
-  selectorItem: {
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    borderRadius: 12,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  selectorItemActive: {
-    backgroundColor: Colors.primaryGlow,
-    borderColor: Colors.primaryGlow,
-  },
-  selectorText: {
-    fontSize: Typography.sizes.lg,
-    color: Colors.textPrimary,
-    fontWeight: Typography.weights.medium,
-  },
-  selectorTextActive: { color: '#FFF' },
 
   saveBtn: { marginTop: Spacing.sm },
 });
