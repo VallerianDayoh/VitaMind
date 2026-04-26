@@ -1,13 +1,12 @@
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useQuery } from 'convex/react';
-import { LinearGradient } from 'expo-linear-gradient';
-import { LineChart } from 'react-native-gifted-charts';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { LineChart } from 'react-native-gifted-charts';
 import { Card } from '../../components/ui/Card';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
-import { Colors, GlowShadow, Spacing, Typography } from '../../constants/theme';
+import { Colors, Spacing, Typography } from '../../constants/theme';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { useAuthStore } from '../../store/authStore';
@@ -84,7 +83,7 @@ export default function HomeScreen() {
   }
   const recent7 = Array.from(groupedMoods.values()).slice(0, 7).reverse();
   const MOOD_TREND_7D = recent7.map(m => MOOD_SCORE[m.mood] || 3);
-  const DAYS_LABEL = recent7.map(m => new Date(m.timestamp || m._creationTime).toLocaleDateString('id-ID', { weekday: 'short' }));
+  const DAYS_LABEL = recent7.map(m => new Date(m.timestamp || m._creationTime).toLocaleDateString('id-ID', { weekday: 'short' }).charAt(0));
 
   return (
     <ScreenWrapper>
@@ -202,15 +201,18 @@ export default function HomeScreen() {
 
         {/* ─── 3. MINI MOOD CHART ────────────────────── */}
         <Card>
-          <Text style={styles.sectionTitle}>Tren Mood 7 Hari</Text>
-          <View style={styles.chartArea}>
-            {/* Y-axis labels */}
-            <View style={styles.yAxis}>
-              <Ionicons name="happy-outline" size={16} color="rgba(255,255,255,0.6)" />
-              <Ionicons name="remove-circle-outline" size={16} color="rgba(255,255,255,0.6)" />
-              <Ionicons name="sad-outline" size={16} color="rgba(255,255,255,0.6)" />
+          <Text style={[styles.sectionTitle, { marginBottom: Spacing.xs }]}>Tren Mood 7 Hari</Text>
+          <Text style={styles.chartSubtitle}>Skala 1 (Sangat Buruk) - 5 (Sangat Baik)</Text>
+          <View style={{ flexDirection: 'row', width: '100%', paddingTop: 10 }}>
+            {/* Absolute positioning mapping exactly to the 5 grid lines of CHART_HEIGHT=120 */}
+            <View style={{ width: 24, height: CHART_HEIGHT, marginRight: Spacing.xs, position: 'relative' }}>
+              <View style={{ position: 'absolute', top: -8 }}><Ionicons name="happy" size={16} color={Colors.success} /></View>
+              <View style={{ position: 'absolute', top: 16 }}><Ionicons name="happy-outline" size={16} color={Colors.primaryGlow} /></View>
+              <View style={{ position: 'absolute', top: 40 }}><Ionicons name="remove-circle-outline" size={16} color={Colors.warning} /></View>
+              <View style={{ position: 'absolute', top: 64 }}><Ionicons name="sad-outline" size={16} color={Colors.error} /></View>
+              <View style={{ position: 'absolute', top: 88 }}><Ionicons name="sad" size={16} color="#FF4D4D" /></View>
             </View>
-            <View style={styles.barsContainer}>
+            <View style={{ flex: 1 }}>
               <LineChart
                 data={MOOD_TREND_7D.map((val, i) => ({
                   value: val,
@@ -225,29 +227,27 @@ export default function HomeScreen() {
                     );
                   }
                 }))}
-                showLine={true}
+                areaChart={true}
                 curved={true}
                 color={Colors.primaryGlow}
-                thickness={2}
+                startFillColor={Colors.primaryGlow}
+                endFillColor={Colors.backgroundBottom}
+                startOpacity={0.4}
+                endOpacity={0.05}
+                thickness={3}
                 height={CHART_HEIGHT}
                 maxValue={5}
                 noOfSections={5}
                 hideRules={true}
+                hideAxesAndRules={true}
                 hideYAxisText={true}
-                yAxisColor="transparent"
-                xAxisColor="transparent"
-                spacing={46}
-                initialSpacing={20}
-                xAxisLabelTextStyle={{ color: Colors.textSecondary, fontSize: 10, marginTop: 4, width: 40, textAlign: 'center' }}
-                isAnimated={true}
+                adjustToWidth={true}
+                initialSpacing={10}
+                endSpacing={10}
+                xAxisLabelTextStyle={{ color: Colors.textSecondary, fontSize: 10, marginTop: 4, textAlign: 'center' }}
+                isAnimated={false}
               />
             </View>
-          </View>
-          <View style={styles.chartCaptionWrap}>
-            <Text style={styles.chartCaption}>
-              Mood kamu cenderung stabil minggu ini. Pertahankan!
-            </Text>
-            <Ionicons name="thumbs-up-outline" size={14} color={Colors.textSecondary} />
           </View>
         </Card>
 
@@ -392,23 +392,14 @@ const styles = StyleSheet.create({
   },
 
   // Chart
+  chartSubtitle: {
+    fontSize: Typography.sizes.xs,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.md,
+  },
   chartArea: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    height: CHART_HEIGHT + 28,
-  },
-  yAxis: {
-    justifyContent: 'space-between',
-    height: CHART_HEIGHT,
-    marginRight: Spacing.sm,
-    paddingBottom: 2,
-  },
-  axisLabel: {
-    fontSize: 14,
-  },
-  barsContainer: {
-    flex: 1,
-    overflow: 'hidden',
+    width: '100%',
+    overflow: 'visible',
   },
   chartCaptionWrap: {
     flexDirection: 'row',
@@ -418,7 +409,7 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   chartCaption: {
-    fontSize: Typography.sizes.sm,
+    fontSize: 13,
     color: Colors.textSecondary,
     textAlign: 'center',
   },

@@ -7,6 +7,9 @@ export const create = mutation({
     email: v.string(),
     major: v.optional(v.string()),
     semester: v.optional(v.number()),
+    university: v.optional(v.string()),
+    batch: v.optional(v.string()),
+    gender: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {

@@ -100,26 +100,26 @@ export const generateInsight = action({
     const cleanSleep = args.sleepLogs.map((l: any) => l.durationInHours);
     const cleanStress = args.stressLogs.map((l: any) => ({ level: l.level, dl: l.hasDeadline }));
 
-    const systemPrompt = `Kamu adalah analis kesehatan mental dan wellbeing untuk mahasiswa.`;
-    const userPrompt = `Tugasmu: Buat analisis mingguan yang hangat, empatik, dan analitis dari data check-in user bernama ${args.userName}.
+    const systemPrompt = `Kamu adalah teman curhat dan analis wellbeing yang asik dan suportif untuk mahasiswa.`;
+    const userPrompt = `Tugasmu: Buat analisis mingguan dari data check-in user bernama ${args.userName}. Gunakan gaya bahasa Indonesia yang santai, luwes, dan kasual (boleh pakai kata 'aku', 'kamu', 'banget', 'ya', 'sih', dll) layaknya ngobrol dengan teman baik atau mentor yang peduli. JANGAN gunakan bahasa baku atau terlalu kaku.
 
 PENTING - FORMAT OUTPUT:
 - JANGAN gunakan format markdown seperti bintang/asterisk (**teks**) sama sekali. Hasilkan teks biasa saja (plaintext).
-- JANGAN buat subjudul atau poin-poin kaku (seperti "Analisis Tidur:", "Observasi Utama:"). Mengalirlah seperti sedang berbicara.
-- Tulis dalam 2 atau 3 paragraf pendek yang dipisahkan oleh 1 baris kosong (Enter/Newline).
-- Gunakan 1 atau 2 emoji yang pas di setiap paragraf agar terasa lebih peduli dan bersahabat.
+- JANGAN buat subjudul atau poin-poin kaku. Mengalirlah seperti sedang mengobrol santai.
+- Tulis dalam 2 atau 3 paragraf berisi 2-3 kalimat yang dipisahkan oleh 1 baris kosong (Enter/Newline).
+- Gunakan 1 atau 2 emoji yang pas di setiap paragraf agar terasa lebih peduli.
 
 PANDUAN KONTEN:
-1. Sapa nama user langsung dan berikan simpulan observasi dari tren datanya.
-2. Jika tidur < 7 jam atau stres tinggi: Berikan saran praktis. Hubungkan empatimu dengan kemungkinan padatnya beban akademik kuliah, tugas, atau himpunan.
-3. Jika tren data baik: Salut dan apresiasi konsistensinya.
+1. Sapa ${args.userName} secara akrab dan berikan simpulan dari data mingguannya dengan gaya santai.
+2. Jika tidur < 7 jam atau stres tinggi: Kasih perhatian, tawarkan saran praktis untuk istirahat. Hubungkan empatimu dengan mungkin padatnya tugas, praktikum, atau urusan kampus biar lebih relate.
+3. Jika tren data baik: Puji dia karena sukses menjaga keseimbangannya.
 
 Data 7 hari terakhir (Berurutan):
 - Tren Mood (Skala 1-Awful s/d 5-Rad): ${JSON.stringify(cleanMood)}
 - Tren Tidur (Jam/hari): ${JSON.stringify(cleanSleep)}
 - Tren Stress (Level dan ada deadline): ${JSON.stringify(cleanStress)}
 
-Tulis HANYA paragraf analisisnya saja, tanpa kalimat pengantar/penutup basa-basi.`;
+Tulis HANYA paragraf analisisnya saja, langsung masuk ke sapaan dan poin utamanya.`;
 
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",

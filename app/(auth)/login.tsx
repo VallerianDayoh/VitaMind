@@ -89,7 +89,7 @@ export default function LoginScreen() {
 
             <Button
               title="Belum punya akun? Daftar sekarang"
-              onPress={() => alert('Fitur pendaftaran belum tersedia.')}
+              onPress={() => router.push('/(auth)/register' as any)}
               variant="ghost"
             />
           </View>
