@@ -97,7 +97,7 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Ringkasan Statistik</Text>
         <View style={styles.statsRow}>
           <Card style={styles.statCard}>
-            <Ionicons name="calendar-outline" size={20} color={Colors.primary} />
+            <Ionicons name="calendar-outline" size={20} color={Colors.primaryGlow} />
             <Text style={styles.statValue}>{totalCheckIns} Hari</Text>
             <Text style={styles.statLabel}>Total Check-in</Text>
           </Card>
@@ -124,8 +124,8 @@ export default function ProfileScreen() {
             <Switch
               value={reminderEnabled}
               onValueChange={setReminderEnabled}
-              trackColor={{ false: Colors.border, true: Colors.primary + '80' }}
-              thumbColor={reminderEnabled ? Colors.primary : '#F4F3F4'}
+              trackColor={{ false: 'rgba(255,255,255,0.15)', true: Colors.primaryGlow + '80' }}
+              thumbColor={reminderEnabled ? Colors.primaryGlow : '#555'}
             />
           </View>
           <View style={styles.divider} />
@@ -157,15 +157,15 @@ export default function ProfileScreen() {
           </Text>
           
           <TouchableOpacity style={styles.sosLinkBtn} onPress={() => Linking.openURL('tel:119')}>
-            <Ionicons name="call" size={16} color={Colors.surface} />
+            <Ionicons name="call" size={16} color="#FFFFFF" />
             <Text style={styles.sosLinkText}>Kemenkes & Sejiwa (119 ext 8)</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.sosLinkBtn, { backgroundColor: '#5A52D5' }]} 
+            style={[styles.sosLinkBtn, { backgroundColor: Colors.primaryGlow }]} 
             onPress={() => console.log('Konseling UNKLAB')}
           >
-            <Ionicons name="business" size={16} color={Colors.surface} />
+            <Ionicons name="business" size={16} color="#FFFFFF" />
             <Text style={styles.sosLinkText}>Konseling Kampus UNKLAB</Text>
           </TouchableOpacity>
         </Card>
@@ -173,9 +173,9 @@ export default function ProfileScreen() {
         {/* 5. Aksi Logout */}
         <Button 
           title="Keluar" 
+          variant="outline"
           onPress={handleLogout} 
           style={styles.logoutBtn}
-          textStyle={styles.logoutBtnText}
         />
 
       </ScrollView>
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: Spacing.md,
     marginTop: Spacing.md,
   },
@@ -205,25 +205,24 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryGlow,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.md,
-    elevation: 4,
-    shadowColor: Colors.primary,
+    shadowColor: Colors.primaryGlow,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
   },
   avatarText: {
     fontSize: Typography.sizes.xxxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.surface,
+    color: '#FFFFFF',
   },
   name: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: 4,
   },
   email: {
@@ -233,14 +232,16 @@ const styles = StyleSheet.create({
   },
   academicInfo: {
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     padding: Spacing.sm,
-    borderRadius: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
     marginBottom: Spacing.lg,
     width: '100%',
   },
   badge: {
-    backgroundColor: '#EEEAFF',
+    backgroundColor: Colors.surfaceActive,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 16,
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: Typography.sizes.xs,
     fontWeight: Typography.weights.bold,
-    color: Colors.primary,
+    color: Colors.primaryGlow,
   },
   universityText: {
     fontSize: Typography.sizes.xs,
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginTop: Spacing.sm,
     marginBottom: 2,
   },
@@ -308,12 +309,12 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.medium,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: 4,
   },
   settingSubtitle: {
     fontSize: Typography.sizes.sm,
-    color: Colors.primary,
+    color: Colors.primaryGlow,
     fontWeight: Typography.weights.bold,
   },
   settingHint: {
@@ -341,8 +342,8 @@ const styles = StyleSheet.create({
 
   // SOS Card
   sosCard: {
-    backgroundColor: '#FFF5F5',
-    borderColor: '#FFD6D6',
+    backgroundColor: 'rgba(255, 107, 122, 0.1)',
+    borderColor: 'rgba(255, 107, 122, 0.25)',
     borderWidth: 1,
     marginBottom: Spacing.xxl,
   },
@@ -359,7 +360,7 @@ const styles = StyleSheet.create({
   },
   sosDesc: {
     fontSize: Typography.sizes.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     marginBottom: Spacing.lg,
     lineHeight: 20,
   },
@@ -369,23 +370,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.error,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 999,
     marginBottom: Spacing.sm,
     gap: Spacing.sm,
   },
   sosLinkText: {
-    color: Colors.surface,
+    color: '#FFFFFF',
     fontWeight: Typography.weights.bold,
     fontSize: Typography.sizes.sm,
   },
 
   // Logout
   logoutBtn: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  logoutBtnText: {
-    color: Colors.text,
+    borderColor: Colors.error,
   },
 });

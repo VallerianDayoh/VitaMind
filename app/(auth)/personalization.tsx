@@ -64,21 +64,21 @@ export default function PersonalizationScreen() {
             <TextInput
               style={styles.formInput}
               placeholder="Nama Panggilan"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={nickname}
               onChangeText={setNickname}
             />
             <TextInput
               style={styles.formInput}
               placeholder="Jurusan (misal: Sistem Informasi)"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={major}
               onChangeText={setMajor}
             />
             <TextInput
               style={styles.formInput}
               placeholder="Semester (misal: 6)"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={semester}
               onChangeText={setSemester}
               keyboardType="number-pad"
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: Typography.sizes.xxxl,
     fontWeight: '800',
-    color: Colors.text,
+    color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: Spacing.md,
   },
@@ -130,13 +130,13 @@ const styles = StyleSheet.create({
   },
   formInput: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: Colors.border,
     paddingHorizontal: Spacing.md,
     paddingVertical: 14,
     fontSize: Typography.sizes.md,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
   startBtn: {

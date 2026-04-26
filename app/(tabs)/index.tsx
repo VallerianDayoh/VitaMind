@@ -1,15 +1,16 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
-import { Card } from '../../components/ui/Card';
-import { Colors, Typography, Spacing } from '../../constants/theme';
-import { useAuthStore } from '../../store/authStore';
-import { MoodType } from '../../types';
 import { useQuery } from 'convex/react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Card } from '../../components/ui/Card';
+import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
+import { Colors, GlowShadow, Spacing, Typography } from '../../constants/theme';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
+import { useAuthStore } from '../../store/authStore';
+import { MoodType } from '../../types';
 
 // ── Helpers ────────────────────────────────────────────────
 
@@ -31,18 +32,18 @@ const getFormattedDate = (): string => {
 };
 
 const MOOD_MAP: Record<MoodType, { emoji: string; label: string; color: string }> = {
-  rad: { emoji: '😁', label: 'Luar Biasa', color: '#00B894' },
-  good: { emoji: '🙂', label: 'Baik', color: '#6C63FF' },
-  meh: { emoji: '😐', label: 'Biasa', color: '#FDCB6E' },
-  bad: { emoji: '🙁', label: 'Buruk', color: '#E17055' },
-  awful: { emoji: '😢', label: 'Sangat Buruk', color: '#D63031' },
+  rad: { emoji: '😁', label: 'Luar Biasa', color: '#5BFFB0' },
+  good: { emoji: '🙂', label: 'Baik', color: '#B388EB' },
+  meh: { emoji: '😐', label: 'Biasa', color: '#FFCF5C' },
+  bad: { emoji: '🙁', label: 'Buruk', color: '#FF9F5C' },
+  awful: { emoji: '😢', label: 'Sangat Buruk', color: '#FF6B7A' },
 };
 
 const QUICK_ACTIONS = [
-  { key: 'mood', label: 'Mood', icon: 'happy-outline' as const, color: '#6C63FF', route: '/checkin/mood' },
-  { key: 'sleep', label: 'Tidur', icon: 'moon-outline' as const, color: '#00B894', route: '/checkin/sleep' },
-  { key: 'stress', label: 'Stres', icon: 'pulse-outline' as const, color: '#FF6584', route: '/checkin/stress' },
-  { key: 'activity', label: 'Aktivitas', icon: 'walk-outline' as const, color: '#FDCB6E', route: '/checkin/activity' },
+  { key: 'mood', label: 'Mood', icon: 'happy-outline' as const, color: '#B388EB', route: '/checkin/mood' },
+  { key: 'sleep', label: 'Tidur', icon: 'moon-outline' as const, color: '#5BFFB0', route: '/checkin/sleep' },
+  { key: 'stress', label: 'Stres', icon: 'pulse-outline' as const, color: '#D87093', route: '/checkin/stress' },
+  { key: 'activity', label: 'Aktivitas', icon: 'walk-outline' as const, color: '#FFCF5C', route: '/checkin/activity' },
 ];
 
 const CHART_HEIGHT = 100;
@@ -156,7 +157,7 @@ export default function HomeScreen() {
               <Ionicons
                 name="add-circle-outline"
                 size={36}
-                color={Colors.primary}
+                color={Colors.primaryGlow}
               />
               <Text style={styles.emptyStateText}>
                 Belum ada check-in hari ini — mulai sekarang?
@@ -178,7 +179,7 @@ export default function HomeScreen() {
               <View
                 style={[
                   styles.quickIconWrap,
-                  { backgroundColor: action.color + '18' },
+                  { backgroundColor: action.color + '20' },
                 ]}
               >
                 <Ionicons name={action.icon} size={28} color={action.color} />
@@ -206,18 +207,21 @@ export default function HomeScreen() {
                   val >= 4
                     ? Colors.success
                     : val >= 3
-                    ? Colors.primary
-                    : val >= 2
-                    ? Colors.warning
-                    : Colors.error;
+                      ? Colors.primaryGlow
+                      : val >= 2
+                        ? Colors.warning
+                        : Colors.error;
                 return (
                   <View key={i} style={styles.barCol}>
                     <View style={styles.barTrack}>
-                      <View
+                      <LinearGradient
+                        colors={[barColor, barColor + '60']}
                         style={[
                           styles.bar,
-                          { height: barH, backgroundColor: barColor },
+                          { height: barH },
                         ]}
+                        start={{ x: 0.5, y: 0 }}
+                        end={{ x: 0.5, y: 1 }}
                       />
                     </View>
                     <Text style={styles.barLabel}>{DAYS_LABEL[i]}</Text>
@@ -232,7 +236,7 @@ export default function HomeScreen() {
         </Card>
 
         {/* ─── 4. WEEKLY INSIGHT PREVIEW  ────── */}
-        <Card style={styles.insightCard}>
+        <Card style={styles.insightCard} isActive>
           <View style={styles.insightHeader}>
             <Text style={styles.insightIcon}>✨</Text>
             <Text style={styles.insightTitle}>Insight Mingguan Tersedia</Text>
@@ -241,7 +245,7 @@ export default function HomeScreen() {
             Vita sudah membaca data kamu minggu ini! Buka tab Laporan untuk membaca analisis yang disesuaikan khusus untukmu.
           </Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/report' as any)}>
-            <Text style={{color: Colors.primary, fontWeight: 'bold', marginTop: 8}}>Buka Laporan →</Text>
+            <Text style={styles.insightLink}>Buka Laporan →</Text>
           </TouchableOpacity>
         </Card>
       </ScrollView>
@@ -263,7 +267,7 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: Typography.sizes.xxxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
   dateText: {
     fontSize: Typography.sizes.sm,
@@ -275,27 +279,30 @@ const styles = StyleSheet.create({
   streakBanner: {
     paddingVertical: Spacing.sm + 2,
     paddingHorizontal: Spacing.md,
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: Spacing.lg,
     alignItems: 'center',
+    borderWidth: 1,
   },
   streakActive: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderColor: 'rgba(255, 165, 0, 0.25)',
   },
   streakInactive: {
-    backgroundColor: Colors.border + '80',
+    backgroundColor: Colors.surface,
+    borderColor: Colors.border,
   },
   streakText: {
     fontSize: Typography.sizes.sm,
     fontWeight: Typography.weights.medium,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
 
   // Section title reused
   sectionTitle: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
 
@@ -346,15 +353,12 @@ const styles = StyleSheet.create({
   quickItem: {
     width: '48%',
     backgroundColor: Colors.surface,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: Spacing.md,
     alignItems: 'center',
     marginBottom: Spacing.md,
-    elevation: 2,
-    shadowColor: Colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   quickIconWrap: {
     width: 56,
@@ -367,7 +371,7 @@ const styles = StyleSheet.create({
   quickLabel: {
     fontSize: Typography.sizes.sm,
     fontWeight: Typography.weights.medium,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
 
   // Chart
@@ -400,7 +404,7 @@ const styles = StyleSheet.create({
   },
   bar: {
     width: 22,
-    borderRadius: 6,
+    borderRadius: 8,
     minHeight: 6,
   },
   barLabel: {
@@ -417,7 +421,7 @@ const styles = StyleSheet.create({
 
   // Insight
   insightCard: {
-    backgroundColor: '#EEEAFF',
+    // Active glow handled by isActive prop on Card
   },
   insightHeader: {
     flexDirection: 'row',
@@ -431,11 +435,16 @@ const styles = StyleSheet.create({
   insightTitle: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
-    color: Colors.primary,
+    color: Colors.primaryGlow,
   },
   insightBody: {
     fontSize: Typography.sizes.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     lineHeight: 22,
+  },
+  insightLink: {
+    color: Colors.primaryGlow,
+    fontWeight: Typography.weights.bold,
+    marginTop: 8,
   },
 });

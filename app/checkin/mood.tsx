@@ -62,7 +62,7 @@ export default function MoodCheckinScreen() {
                 <Text
                   style={[
                     styles.moodLabel,
-                    isActive && { color: Colors.primary, fontWeight: '700' },
+                    isActive && { color: Colors.primaryGlow, fontWeight: '700' },
                   ]}
                 >
                   {m.label}
@@ -76,7 +76,7 @@ export default function MoodCheckinScreen() {
         <TextInput
           style={styles.textArea}
           placeholder="Ceritakan kalau mau..."
-          placeholderTextColor={Colors.textSecondary}
+          placeholderTextColor="rgba(255,255,255,0.4)"
           multiline
           numberOfLines={4}
           textAlignVertical="top"
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     textAlign: 'center',
     marginTop: Spacing.lg,
     marginBottom: Spacing.xl,
@@ -120,8 +120,8 @@ const styles = StyleSheet.create({
     width: '18%',
   },
   moodBtnActive: {
-    borderColor: Colors.primary,
-    backgroundColor: '#EEEAFF',
+    borderColor: Colors.primaryGlow,
+    backgroundColor: Colors.surfaceActive,
   },
   moodEmoji: { fontSize: 38, marginBottom: Spacing.xs },
   moodLabel: {
@@ -136,10 +136,10 @@ const styles = StyleSheet.create({
   },
   textArea: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: Spacing.md,
     fontSize: Typography.sizes.md,
-    color: Colors.text,
+    color: Colors.textPrimary,
     borderWidth: 1,
     borderColor: Colors.border,
     minHeight: 110,

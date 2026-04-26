@@ -87,10 +87,10 @@ export default function SleepCheckinScreen() {
 
         {/* Duration preview */}
         <View style={styles.durationBox}>
-          <Ionicons name="time-outline" size={22} color={Colors.primary} />
+          <Ionicons name="time-outline" size={22} color={Colors.primaryGlow} />
           <Text style={styles.durationText}>
             Kamu tidur{' '}
-            <Text style={{ fontWeight: '700', color: Colors.primary }}>
+            <Text style={{ fontWeight: '700', color: Colors.primaryGlow }}>
               {duration.h} jam {duration.m > 0 ? `${duration.m} menit` : ''}
             </Text>
           </Text>
@@ -109,7 +109,7 @@ export default function SleepCheckinScreen() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.qualityIcon}>{q.icon}</Text>
-                <Text style={[styles.qualityLabel, active && { color: Colors.primary, fontWeight: '700' }]}>
+                <Text style={[styles.qualityLabel, active && { color: Colors.primaryGlow, fontWeight: '700' }]}>
                   {q.label}
                 </Text>
               </TouchableOpacity>
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     textAlign: 'center',
     marginTop: Spacing.md,
     marginBottom: Spacing.lg,
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   colon: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginHorizontal: Spacing.sm,
   },
 
@@ -188,21 +188,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
-    backgroundColor: '#EEEAFF',
-    borderRadius: 12,
+    backgroundColor: Colors.surfaceActive,
+    borderRadius: 16,
     marginBottom: Spacing.lg,
     gap: Spacing.sm,
   },
   durationText: {
     fontSize: Typography.sizes.md,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
 
   // Quality
   sectionTitle: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
   qualityRow: {
@@ -218,11 +218,10 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
     backgroundColor: Colors.surface,
     width: '23%',
-    elevation: 1,
   },
   qualityBtnActive: {
-    borderColor: Colors.primary,
-    backgroundColor: '#EEEAFF',
+    borderColor: Colors.primaryGlow,
+    backgroundColor: Colors.surfaceActive,
   },
   qualityIcon: { fontSize: 28, marginBottom: Spacing.xs },
   qualityLabel: { fontSize: Typography.sizes.xs, color: Colors.textSecondary, textAlign: 'center' },
@@ -232,18 +231,18 @@ const styles = StyleSheet.create({
   selectorItem: {
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
   },
   selectorItemActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryGlow,
+    borderColor: Colors.primaryGlow,
   },
   selectorText: {
     fontSize: Typography.sizes.lg,
-    color: Colors.text,
+    color: Colors.textPrimary,
     fontWeight: Typography.weights.medium,
   },
   selectorTextActive: { color: '#FFF' },

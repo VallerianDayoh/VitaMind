@@ -1,5 +1,7 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, ViewStyle, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { StyleSheet, ViewStyle, KeyboardAvoidingView, Platform, View, StatusBar } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Spacing } from '../../constants/theme';
 
 interface ScreenWrapperProps {
@@ -7,6 +9,7 @@ interface ScreenWrapperProps {
   style?: ViewStyle;
   contentContainerStyle?: ViewStyle;
   withKeyboard?: boolean;
+  noPadding?: boolean;
 }
 
 export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
@@ -14,18 +17,27 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
   style,
   contentContainerStyle,
   withKeyboard = false,
+  noPadding = false,
 }) => {
+  const insets = useSafeAreaInsets();
+
   const content = (
-    <View style={[styles.content, contentContainerStyle]}>
+    <View style={[styles.content, !noPadding && { padding: Spacing.md }, contentContainerStyle]}>
       {children}
     </View>
   );
 
   return (
-    <SafeAreaView style={[styles.container, style]}>
+    <LinearGradient
+      colors={[Colors.backgroundTop, Colors.backgroundBottom]}
+      style={[styles.gradient, { paddingTop: insets.top }, style]}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+    >
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       {withKeyboard ? (
-        <KeyboardAvoidingView 
-          style={styles.container} 
+        <KeyboardAvoidingView
+          style={styles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           {content}
@@ -33,17 +45,18 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
       ) : (
         content
       )}
-    </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: {
     flex: 1,
-    backgroundColor: Colors.background,
+  },
+  flex: {
+    flex: 1,
   },
   content: {
     flex: 1,
-    padding: Spacing.md,
   },
 });

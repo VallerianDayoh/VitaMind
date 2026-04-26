@@ -159,8 +159,8 @@ export default function StressCheckinScreen() {
             <Switch
               value={hasDeadline}
               onValueChange={handleToggleDeadline}
-              trackColor={{ false: Colors.border, true: Colors.primary + '80' }}
-              thumbColor={hasDeadline ? Colors.primary : '#F4F3F4'}
+              trackColor={{ false: 'rgba(255,255,255,0.15)', true: Colors.primaryGlow + '80' }}
+              thumbColor={hasDeadline ? Colors.primaryGlow : '#555'}
             />
           </View>
 
@@ -169,7 +169,7 @@ export default function StressCheckinScreen() {
             <TextInput
               style={styles.deadlineInput}
               placeholder="Mata kuliah/kegiatan apa? (Opsional)"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={deadlineContext}
               onChangeText={setDeadlineContext}
               returnKeyType="done"
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     textAlign: 'center',
     marginTop: Spacing.md,
     marginBottom: Spacing.md,
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   questionCard: { marginBottom: Spacing.sm },
   questionNum: {
     fontSize: Typography.sizes.xs,
-    color: Colors.primary,
+    color: Colors.primaryGlow,
     fontWeight: Typography.weights.bold,
     marginBottom: Spacing.xs,
     textTransform: 'uppercase',
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   },
   questionText: {
     fontSize: Typography.sizes.md,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: Spacing.md,
     lineHeight: 24,
   },
@@ -234,19 +234,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: Spacing.sm + 2,
-    borderRadius: 10,
-    backgroundColor: Colors.background,
+    borderRadius: 12,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
   },
   optionBtnActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryGlow,
+    borderColor: Colors.primaryGlow,
   },
   optionValue: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
   optionLabel: { fontSize: 9, color: Colors.textSecondary, marginTop: 2 },
 
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   toggleLabel: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.medium,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
   toggleSub: {
     fontSize: Typography.sizes.xs,
@@ -268,14 +268,14 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   deadlineInput: {
-    backgroundColor: Colors.background,
-    borderRadius: 10,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm + 2,
     fontSize: Typography.sizes.sm,
-    color: Colors.text,
+    color: Colors.textPrimary,
     borderWidth: 1,
-    borderColor: Colors.primary + '60',
+    borderColor: Colors.primaryGlow + '60',
     height: 44,
   },
 

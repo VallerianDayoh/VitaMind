@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -249,7 +249,7 @@ export default function UnifiedCheckinScreen() {
           <TextInput
             style={styles.noteInput}
             placeholder="Ceritakan kalau mau..."
-            placeholderTextColor={Colors.textSecondary}
+            placeholderTextColor="rgba(255,255,255,0.4)"
             multiline
             numberOfLines={3}
             textAlignVertical="top"
@@ -266,7 +266,7 @@ export default function UnifiedCheckinScreen() {
           {renderTimePicker('Bangun', wakeH, setWakeH, wakeM, setWakeM)}
 
           <View style={styles.sleepBadge}>
-            <Ionicons name="moon" size={18} color={Colors.primary} />
+            <Ionicons name="moon" size={18} color={Colors.primaryGlow} />
             <Text style={styles.sleepBadgeText}>
               Kamu tidur ~
               <Text style={styles.sleepBold}>
@@ -324,8 +324,8 @@ export default function UnifiedCheckinScreen() {
             <Switch
               value={hasDeadline}
               onValueChange={handleToggleDeadline}
-              trackColor={{ false: Colors.border, true: Colors.primary + '80' }}
-              thumbColor={hasDeadline ? Colors.primary : '#F4F3F4'}
+              trackColor={{ false: 'rgba(255,255,255,0.15)', true: Colors.primaryGlow + '80' }}
+              thumbColor={hasDeadline ? Colors.primaryGlow : '#555'}
             />
           </View>
 
@@ -334,7 +334,7 @@ export default function UnifiedCheckinScreen() {
             <TextInput
               style={styles.deadlineInput}
               placeholder="Mata kuliah/kegiatan apa? (Opsional)"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={deadlineContext}
               onChangeText={setDeadlineContext}
               returnKeyType="done"
@@ -375,7 +375,7 @@ export default function UnifiedCheckinScreen() {
                 setActivityDuration(n > 0 ? String(n) : '');
               }}
             >
-              <Ionicons name="remove-circle-outline" size={32} color={Colors.primary} />
+              <Ionicons name="remove-circle-outline" size={32} color={Colors.primaryGlow} />
             </TouchableOpacity>
             <TextInput
               style={styles.durationInput}
@@ -383,7 +383,7 @@ export default function UnifiedCheckinScreen() {
               onChangeText={(t) => setActivityDuration(t.replace(/[^0-9]/g, ''))}
               keyboardType="number-pad"
               placeholder="0"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               maxLength={3}
             />
             <TouchableOpacity
@@ -391,7 +391,7 @@ export default function UnifiedCheckinScreen() {
                 setActivityDuration(String((parseInt(activityDuration) || 0) + 5))
               }
             >
-              <Ionicons name="add-circle-outline" size={32} color={Colors.primary} />
+              <Ionicons name="add-circle-outline" size={32} color={Colors.primaryGlow} />
             </TouchableOpacity>
           </View>
         </Card>
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginTop: Spacing.sm,
   },
   pageSubtitle: {
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
 
@@ -444,19 +444,19 @@ const styles = StyleSheet.create({
     width: '18.5%',
   },
   moodBtnActive: {
-    borderColor: Colors.primary,
-    backgroundColor: '#EEEAFF',
+    borderColor: Colors.primaryGlow,
+    backgroundColor: Colors.surfaceActive,
   },
   moodEmoji: { fontSize: 34, marginBottom: 4 },
   moodLabel: { fontSize: 10, color: Colors.textSecondary, textAlign: 'center' },
-  moodLabelActive: { color: Colors.primary, fontWeight: '700' },
+  moodLabelActive: { color: Colors.primaryGlow, fontWeight: '700' },
 
   noteInput: {
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     padding: Spacing.md,
     fontSize: Typography.sizes.sm,
-    color: Colors.text,
+    color: Colors.textPrimary,
     borderWidth: 1,
     borderColor: Colors.border,
     minHeight: 72,
@@ -474,26 +474,26 @@ const styles = StyleSheet.create({
   timeColon: {
     fontSize: Typography.sizes.xl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginHorizontal: Spacing.sm,
   },
   chipRow: { flexDirection: 'row', gap: Spacing.xs },
   timeChip: {
     paddingVertical: 6,
     paddingHorizontal: Spacing.md,
-    borderRadius: 8,
-    backgroundColor: Colors.background,
+    borderRadius: 10,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
   },
   timeChipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryGlow,
+    borderColor: Colors.primaryGlow,
   },
   timeChipText: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.medium,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
   timeChipTextActive: { color: '#FFF' },
 
@@ -501,14 +501,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EEEAFF',
+    backgroundColor: Colors.surfaceActive,
     paddingVertical: Spacing.sm + 2,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: Spacing.md,
     gap: Spacing.sm,
   },
-  sleepBadgeText: { fontSize: Typography.sizes.sm, color: Colors.text },
-  sleepBold: { fontWeight: '700', color: Colors.primary },
+  sleepBadgeText: { fontSize: Typography.sizes.sm, color: Colors.textPrimary },
+  sleepBold: { fontWeight: '700', color: Colors.primaryGlow },
 
   pillHeading: {
     fontSize: Typography.sizes.sm,
@@ -524,25 +524,25 @@ const styles = StyleSheet.create({
   pill: {
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
-    borderRadius: 20,
-    backgroundColor: Colors.background,
+    borderRadius: 999,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
   },
   pillActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryGlow,
+    borderColor: Colors.primaryGlow,
   },
   pillText: {
     fontSize: Typography.sizes.sm,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
   pillTextActive: { color: '#FFF', fontWeight: '700' },
 
   // ── Stress ───────────────────────────────────────────
   stressQ: {
     fontSize: Typography.sizes.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     marginBottom: Spacing.md,
     lineHeight: 22,
   },
@@ -556,26 +556,26 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: Spacing.sm + 2,
-    borderRadius: 10,
-    backgroundColor: Colors.background,
+    borderRadius: 12,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
   },
   stressBtnActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryGlow,
+    borderColor: Colors.primaryGlow,
   },
   stressValue: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
   stressLabel: { fontSize: 9, color: Colors.textSecondary, marginTop: 2 },
 
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     padding: Spacing.md,
   },
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
   toggleTitle: {
     fontSize: Typography.sizes.sm,
     fontWeight: Typography.weights.medium,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
   toggleSub: { fontSize: Typography.sizes.xs, color: Colors.textSecondary, marginTop: 2 },
 
@@ -591,14 +591,14 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   deadlineInput: {
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     borderRadius: 10,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm + 2,
     fontSize: Typography.sizes.sm,
-    color: Colors.text,
+    color: Colors.textPrimary,
     borderWidth: 1,
-    borderColor: Colors.primary + '60',
+    borderColor: Colors.primaryGlow + '60',
     height: 44,
   },
 
@@ -610,17 +610,17 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     paddingVertical: Spacing.sm + 2,
     paddingHorizontal: Spacing.md,
-    borderRadius: 24,
-    backgroundColor: Colors.background,
+    borderRadius: 999,
+    backgroundColor: Colors.surface,
     borderWidth: 1.5,
     borderColor: Colors.border,
   },
   activityChipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryGlow,
+    borderColor: Colors.primaryGlow,
   },
   activityIcon: { fontSize: 18 },
-  activityLabel: { fontSize: Typography.sizes.sm, color: Colors.text },
+  activityLabel: { fontSize: Typography.sizes.sm, color: Colors.textPrimary },
 
   durationRow: {
     flexDirection: 'row',
@@ -631,11 +631,11 @@ const styles = StyleSheet.create({
   durationInput: {
     fontSize: 40,
     fontWeight: '700',
-    color: Colors.text,
+    color: Colors.textPrimary,
     textAlign: 'center',
     minWidth: 90,
     borderBottomWidth: 2,
-    borderBottomColor: Colors.primary,
+    borderBottomColor: Colors.primaryGlow,
     paddingVertical: Spacing.xs,
   },
 

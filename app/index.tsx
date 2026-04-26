@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -51,24 +52,33 @@ export default function SplashScreen() {
   }));
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={[Colors.backgroundTop, Colors.backgroundBottom]}
+      style={styles.container}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+    >
       <Animated.View style={[styles.logoWrap, logoStyle]}>
-        <View style={styles.iconCircle}>
+        <LinearGradient
+          colors={[Colors.buttonGradientStart, Colors.buttonGradientEnd]}
+          style={styles.iconCircle}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
           <Text style={styles.iconText}>🧠</Text>
-        </View>
+        </LinearGradient>
         <Text style={styles.brand}>VitaMind</Text>
         <Text style={styles.tagline}>Jaga jiwamu, selangkah demi selangkah.</Text>
       </Animated.View>
 
       <Text style={styles.footer}>Powered by Convex & Vita AI</Text>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -79,10 +89,13 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: 'rgba(255,255,255,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
+    shadowColor: '#D87093',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
   },
   iconText: {
     fontSize: 52,
@@ -96,12 +109,12 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: Typography.sizes.md,
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(255,255,255,0.6)',
   },
   footer: {
     position: 'absolute',
     bottom: 48,
     fontSize: Typography.sizes.xs,
-    color: 'rgba(255,255,255,0.4)',
+    color: 'rgba(255,255,255,0.3)',
   },
 });

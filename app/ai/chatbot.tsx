@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery, useMutation, useAction } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
@@ -138,7 +139,16 @@ export default function VitaChatbotScreen() {
             isCrisis && styles.bubbleCrisis,
           ]}
         >
-          {isCrisis ? (
+          {isUser ? (
+            <LinearGradient
+              colors={Colors.buttonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.userBubbleGradient}
+            >
+              <Text style={styles.bubbleTextUser}>{item.text}</Text>
+            </LinearGradient>
+          ) : isCrisis ? (
             <>
               <Text style={styles.bubbleTextVita}>
                 {item.text.split('📞')[0]}
@@ -154,9 +164,7 @@ export default function VitaChatbotScreen() {
               </Text>
             </>
           ) : (
-            <Text style={isUser ? styles.bubbleTextUser : styles.bubbleTextVita}>
-              {item.text}
-            </Text>
+            <Text style={styles.bubbleTextVita}>{item.text}</Text>
           )}
         </View>
         <Text style={[styles.timestamp, isUser && { textAlign: 'right' }]}>
@@ -167,64 +175,78 @@ export default function VitaChatbotScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
+    <LinearGradient
+      colors={[Colors.backgroundTop, Colors.backgroundBottom]}
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
     >
-      {/* Disclaimer banner */}
-      <TouchableOpacity
-        style={styles.disclaimer}
-        onPress={() => Linking.openURL('tel:119')}
-        activeOpacity={0.8}
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
-        <Text style={styles.disclaimerText}>
-          ⚠️ Vita adalah teman virtual, bukan psikolog. Jika butuh bantuan profesional,{' '}
-          <Text style={styles.disclaimerLink}>tap di sini.</Text>
-        </Text>
-      </TouchableOpacity>
-
-      {/* Chat list */}
-      <FlatList
-        ref={flatRef}
-        data={messages}
-        keyExtractor={(m) => m.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.chatList}
-        onContentSizeChange={() => flatRef.current?.scrollToEnd({ animated: true })}
-        showsVerticalScrollIndicator={false}
-        ListFooterComponent={
-          isTyping ? (
-            <View style={[styles.bubbleWrap, styles.bubbleLeft]}>
-              <View style={[styles.bubble, styles.bubbleVita]}>
-                <Text style={styles.typingDots}>Vita sedang mengetik...</Text>
-              </View>
-            </View>
-          ) : null
-        }
-      />
-
-      {/* Input bar */}
-      <View style={styles.inputBar}>
-        <TextInput
-          style={styles.textInput}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Tulis pesan..."
-          placeholderTextColor={Colors.textSecondary}
-          multiline
-          maxLength={500}
-        />
+        {/* Disclaimer banner */}
         <TouchableOpacity
-          style={[styles.sendBtn, (!input.trim() || isTyping) && { opacity: 0.4 }]}
-          onPress={sendMessage}
-          disabled={!input.trim() || isTyping}
-          activeOpacity={0.7}
+          style={styles.disclaimer}
+          onPress={() => Linking.openURL('tel:119')}
+          activeOpacity={0.8}
         >
-          <Ionicons name="send" size={22} color="#FFF" />
+          <Text style={styles.disclaimerText}>
+            ⚠️ Vita adalah teman virtual, bukan psikolog. Jika butuh bantuan profesional,{' '}
+            <Text style={styles.disclaimerLink}>tap di sini.</Text>
+          </Text>
         </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+
+        {/* Chat list */}
+        <FlatList
+          ref={flatRef}
+          data={messages}
+          keyExtractor={(m) => m.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.chatList}
+          onContentSizeChange={() => flatRef.current?.scrollToEnd({ animated: true })}
+          showsVerticalScrollIndicator={false}
+          ListFooterComponent={
+            isTyping ? (
+              <View style={[styles.bubbleWrap, styles.bubbleLeft]}>
+                <View style={[styles.bubble, styles.bubbleVita]}>
+                  <Text style={styles.typingDots}>Vita sedang mengetik...</Text>
+                </View>
+              </View>
+            ) : null
+          }
+        />
+
+        {/* Input bar */}
+        <View style={styles.inputBar}>
+          <TextInput
+            style={styles.textInput}
+            value={input}
+            onChangeText={setInput}
+            placeholder="Tulis pesan..."
+            placeholderTextColor="rgba(255,255,255,0.4)"
+            multiline
+            maxLength={500}
+          />
+          <TouchableOpacity
+            style={[styles.sendBtn, (!input.trim() || isTyping) && { opacity: 0.4 }]}
+            onPress={sendMessage}
+            disabled={!input.trim() || isTyping}
+            activeOpacity={0.7}
+          >
+            <LinearGradient
+              colors={Colors.buttonGradient}
+              style={styles.sendBtnGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="send" size={20} color="#FFF" />
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 }
 
@@ -233,18 +255,22 @@ export default function VitaChatbotScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+  },
+  flex: {
+    flex: 1,
   },
 
   // Disclaimer
   disclaimer: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: 'rgba(255, 107, 122, 0.12)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 107, 122, 0.2)',
     paddingVertical: Spacing.sm + 2,
     paddingHorizontal: Spacing.md,
   },
   disclaimerText: {
     fontSize: Typography.sizes.xs,
-    color: Colors.text,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 18,
   },
@@ -265,11 +291,15 @@ const styles = StyleSheet.create({
   bubbleLeft: { alignSelf: 'flex-start' },
   bubbleRight: { alignSelf: 'flex-end' },
   bubble: {
-    padding: Spacing.md,
     borderRadius: 18,
+    overflow: 'hidden',
   },
   bubbleUser: {
-    backgroundColor: Colors.primary,
+    borderBottomRightRadius: 4,
+  },
+  userBubbleGradient: {
+    padding: Spacing.md,
+    borderRadius: 18,
     borderBottomRightRadius: 4,
   },
   bubbleVita: {
@@ -277,11 +307,12 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
     borderWidth: 1,
     borderColor: Colors.border,
+    padding: Spacing.md,
   },
   bubbleCrisis: {
     borderColor: Colors.error,
     borderWidth: 1.5,
-    backgroundColor: '#FFF5F5',
+    backgroundColor: 'rgba(255, 107, 122, 0.1)',
   },
   bubbleTextUser: {
     color: '#FFF',
@@ -289,12 +320,12 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   bubbleTextVita: {
-    color: Colors.text,
+    color: Colors.textPrimary,
     fontSize: Typography.sizes.md,
     lineHeight: 22,
   },
   hotlineText: {
-    color: Colors.text,
+    color: Colors.textPrimary,
     fontSize: Typography.sizes.md,
     lineHeight: 28,
     marginVertical: Spacing.sm,
@@ -326,24 +357,31 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.md,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
-    backgroundColor: Colors.surface,
+    backgroundColor: 'rgba(10, 14, 41, 0.9)',
     gap: Spacing.sm,
   },
   textInput: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.border,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm + 2,
     fontSize: Typography.sizes.md,
-    color: Colors.text,
+    color: Colors.textPrimary,
     maxHeight: 100,
   },
   sendBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.primary,
+    overflow: 'hidden',
+  },
+  sendBtnGradient: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },

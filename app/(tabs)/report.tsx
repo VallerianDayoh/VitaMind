@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useAction } from 'convex/react';
+import { LinearGradient } from 'expo-linear-gradient';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { useAuthStore } from '../../store/authStore';
@@ -22,9 +23,6 @@ interface ChartData {
 
 // ── Variables ──────────────────────────────────────────────
 const CHART_HEIGHT = 120;
-const PRIMARY_LIGHT = '#EEEAFF';
-const PRIMARY_DARK = '#5046D5';
-const DANGER_LIGHT = '#FFF5F5';
 
 export default function ReportScreen() {
   const router = useRouter();
@@ -131,21 +129,21 @@ export default function ReportScreen() {
           </View>
         )}
 
-        <Card style={styles.insightCard}>
+        <Card style={styles.insightCard} isActive>
           <View style={styles.insightHeader}>
             <Text style={styles.insightIcon}>✨</Text>
             <Text style={styles.insightTitle}>Analisis Vita</Text>
           </View>
           {isGenerating ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8 }}>
-              <ActivityIndicator size="small" color={Colors.primary} />
+              <ActivityIndicator size="small" color={Colors.primaryGlow} />
               <Text style={[styles.insightText, { fontStyle: 'italic' }]}>Vita sedang membaca datamu...</Text>
             </View>
           ) : insightText ? (
             <View>
               <Text style={styles.insightText}>{insightText}</Text>
               <TouchableOpacity onPress={handleGenerateInsight} style={styles.regenerateBtn} activeOpacity={0.7}>
-                <Ionicons name="refresh-outline" size={16} color={Colors.primary} />
+                <Ionicons name="refresh-outline" size={16} color={Colors.primaryGlow} />
                 <Text style={styles.regenerateText}>Buat Ulang Analisis</Text>
               </TouchableOpacity>
             </View>
@@ -196,11 +194,16 @@ export default function ReportScreen() {
               <View style={[styles.targetLine, { bottom: (8 / 10) * CHART_HEIGHT }]} />
               {dynamicSleepData.map((d, i) => {
                 const barH = (d.value / 10) * CHART_HEIGHT;
-                const barColor = d.value < 6 ? Colors.error : Colors.primary;
+                const barColor = d.value < 6 ? Colors.error : Colors.primaryGlow;
                 return (
                   <View key={`sleep-${i}`} style={styles.chartColumn}>
                     <View style={[styles.barWrapper, { height: CHART_HEIGHT }]}>
-                      <View style={[styles.verticalBar, { height: barH, backgroundColor: barColor }]} />
+                      <LinearGradient
+                        colors={[barColor, barColor + '40']}
+                        style={[styles.verticalBar, { height: barH }]}
+                        start={{ x: 0.5, y: 0 }}
+                        end={{ x: 0.5, y: 1 }}
+                      />
                     </View>
                     <Text style={styles.chartXLabel}>{d.label}</Text>
                   </View>
@@ -252,7 +255,7 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: Spacing.md,
     marginTop: Spacing.sm,
   },
@@ -262,7 +265,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Colors.surface,
     padding: 4,
-    borderRadius: 8,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: Colors.border,
     marginBottom: Spacing.lg,
@@ -271,10 +274,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 12,
   },
   filterBtnActive: {
-    backgroundColor: PRIMARY_LIGHT,
+    backgroundColor: Colors.surfaceActive,
   },
   filterText: {
     fontSize: Typography.sizes.sm,
@@ -282,16 +285,16 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   filterTextActive: {
-    color: PRIMARY_DARK,
+    color: Colors.primaryGlow,
     fontWeight: Typography.weights.bold,
   },
 
   // Risk Banner
   riskBanner: {
-    backgroundColor: DANGER_LIGHT,
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 107, 122, 0.1)',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#FFD6D6',
+    borderColor: 'rgba(255, 107, 122, 0.25)',
     padding: Spacing.md,
     marginBottom: Spacing.lg,
   },
@@ -308,7 +311,7 @@ const styles = StyleSheet.create({
   },
   riskBody: {
     fontSize: Typography.sizes.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     lineHeight: 20,
     marginBottom: Spacing.sm,
   },
@@ -320,10 +323,7 @@ const styles = StyleSheet.create({
 
   // Insight UI
   insightCard: {
-    backgroundColor: '#FAF9FF',
     marginBottom: Spacing.lg,
-    borderWidth: 1,
-    borderColor: PRIMARY_LIGHT,
   },
   insightHeader: {
     flexDirection: 'row',
@@ -337,11 +337,11 @@ const styles = StyleSheet.create({
   insightTitle: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.bold,
-    color: PRIMARY_DARK,
+    color: Colors.primaryGlow,
   },
   insightText: {
     fontSize: Typography.sizes.sm,
-    color: Colors.text,
+    color: Colors.textSecondary,
     lineHeight: 22,
   },
   regenerateBtn: {
@@ -352,14 +352,14 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: '#FFF',
+    borderRadius: 999,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: Colors.primary + '40',
+    borderColor: Colors.border,
   },
   regenerateText: {
     fontSize: Typography.sizes.sm,
-    color: Colors.primary,
+    color: Colors.primaryGlow,
     fontWeight: Typography.weights.medium,
   },
 
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   chartTitle: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
   },
   chartSubtitle: {
     fontSize: Typography.sizes.xs,
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     zIndex: 2,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryGlow,
   },
 
   // Bar Chart Specific (Sleep)
@@ -420,9 +420,8 @@ const styles = StyleSheet.create({
   },
   verticalBar: {
     width: 18,
-    borderTopLeftRadius: 4,
-    borderTopRightRadius: 4,
-    backgroundColor: Colors.primary,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
   },
   targetLine: {
     position: 'absolute',
@@ -438,20 +437,16 @@ const styles = StyleSheet.create({
   // Annotations
   annotationBox: {
     position: 'absolute',
-    backgroundColor: Colors.text,
+    backgroundColor: 'rgba(255,255,255,0.15)',
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 4,
     zIndex: 10,
     minWidth: 40,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2, 
   },
   annotationText: {
-    color: '#FFF',
+    color: Colors.textPrimary,
     fontSize: 7,
     fontWeight: 'bold',
     textAlign: 'center',

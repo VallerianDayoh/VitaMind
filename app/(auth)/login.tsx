@@ -90,7 +90,7 @@ export default function LoginScreen() {
             <Button
               title="Belum punya akun? Daftar sekarang"
               onPress={() => alert('Fitur pendaftaran belum tersedia.')}
-              variant="outline"
+              variant="ghost"
             />
           </View>
         </View>
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: Colors.primaryGlow,
     marginBottom: Spacing.md,
   },
   subtitle: {

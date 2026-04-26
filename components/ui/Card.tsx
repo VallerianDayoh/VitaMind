@@ -1,15 +1,22 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
-import { Colors, Spacing } from '../../constants/theme';
+import { Colors, Spacing, GlowShadow } from '../../constants/theme';
 
 interface CardProps {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  isActive?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ children, style }) => {
+export const Card: React.FC<CardProps> = ({ children, style, isActive = false }) => {
   return (
-    <View style={[styles.card, style]}>
+    <View
+      style={[
+        styles.card,
+        isActive && styles.active,
+        style,
+      ]}
+    >
       {children}
     </View>
   );
@@ -18,13 +25,15 @@ export const Card: React.FC<CardProps> = ({ children, style }) => {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.surface,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: Spacing.md,
-    shadowColor: Colors.text,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.border,
     marginBottom: Spacing.md,
+  },
+  active: {
+    backgroundColor: 'rgba(179, 136, 235, 0.15)',
+    borderColor: Colors.primaryGlow,
+    borderWidth: 1.5,
   },
 });

@@ -30,7 +30,7 @@ export default function CheckInTabScreen() {
     <ScreenWrapper>
       <View style={styles.container}>
         <View style={styles.iconWrap}>
-          <Ionicons name="clipboard" size={56} color={Colors.primary} />
+          <Ionicons name="clipboard" size={56} color={Colors.primaryGlow} />
         </View>
 
         <Text style={styles.title}>Check-in Harian</Text>
@@ -48,7 +48,7 @@ export default function CheckInTabScreen() {
             </Text>
           </Card>
         ) : (
-          <Card key="cta" style={[styles.statusCard, styles.ctaCard]}>
+          <Card key="cta" style={[styles.statusCard, styles.ctaCard]} isActive>
             <Text style={styles.ctaTitle}>💡 Ayo check perasaan kamu!</Text>
             <Text style={styles.statusSub}>
               Bagaimana perasaan dan tidurmu semalam? Yuk, luangkan waktu sebentar.
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     width: 110,
     height: 110,
     borderRadius: 55,
-    backgroundColor: '#EEEAFF',
+    backgroundColor: Colors.surfaceActive,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: Spacing.sm,
   },
   subtitle: {
@@ -124,14 +124,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   ctaCard: {
-    backgroundColor: '#F8F9FE',
-    borderColor: Colors.primary,
-    borderWidth: 1,
+    // isActive prop handles glow styling
   },
   ctaTitle: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.bold,
-    color: Colors.primary,
+    color: Colors.primaryGlow,
     marginBottom: 4,
   },
 });

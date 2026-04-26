@@ -7,13 +7,13 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.primary,
+        tabBarActiveTintColor: Colors.primaryGlow,
         tabBarInactiveTintColor: Colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: Colors.surface,
+          backgroundColor: 'rgba(10, 14, 41, 0.95)',
           borderTopColor: Colors.border,
           borderTopWidth: 1,
-          elevation: 5,
+          elevation: 0,
           height: 65,
           paddingBottom: 10,
           paddingTop: 10,
@@ -21,7 +21,7 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '500',
-        }
+        },
       }}
     >
       <Tabs.Screen

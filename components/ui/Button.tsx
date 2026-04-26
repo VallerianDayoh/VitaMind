@@ -1,11 +1,20 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, ActivityIndicator } from 'react-native';
-import { Colors, Typography, Spacing } from '../../constants/theme';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+  ActivityIndicator,
+  View,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Colors, Typography, Spacing, GlowShadow } from '../../constants/theme';
 
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
@@ -22,39 +31,67 @@ export const Button: React.FC<ButtonProps> = ({
   loading = false,
 }) => {
   const isOutline = variant === 'outline';
-  
-  const getBackgroundColor = () => {
-    if (disabled) return Colors.border;
-    if (isOutline) return 'transparent';
-    return variant === 'primary' ? Colors.primary : Colors.secondary;
-  };
+  const isGhost = variant === 'ghost';
 
-  const getTextColor = () => {
-    if (disabled) return Colors.textSecondary;
-    if (isOutline) return Colors.primary;
-    return Colors.surface;
-  };
+  // ── Outline / Ghost variant ──────────────────────────────
+  if (isOutline || isGhost) {
+    return (
+      <TouchableOpacity
+        style={[
+          styles.container,
+          isOutline && styles.outline,
+          isGhost && styles.ghost,
+          disabled && styles.disabled,
+          style,
+        ]}
+        onPress={onPress}
+        disabled={disabled || loading}
+        activeOpacity={0.75}
+      >
+        {loading ? (
+          <ActivityIndicator color={Colors.primaryGlow} />
+        ) : (
+          <Text
+            style={[
+              styles.text,
+              { color: isOutline ? Colors.primaryGlow : Colors.textSecondary },
+              textStyle,
+            ]}
+          >
+            {title}
+          </Text>
+        )}
+      </TouchableOpacity>
+    );
+  }
+
+  // ── Primary / Secondary (gradient + glow) ────────────────
+  const gradientColors: readonly [string, string] =
+    variant === 'secondary'
+      ? [Colors.primaryGlow, Colors.buttonGradientEnd]
+      : Colors.buttonGradient;
 
   return (
     <TouchableOpacity
-      style={[
-        styles.container,
-        { backgroundColor: getBackgroundColor() },
-        isOutline && styles.outline,
-        disabled && styles.disabled,
-        style,
-      ]}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}
+      style={[disabled ? styles.disabled : styles.glowWrap, style]}
     >
-      {loading ? (
-        <ActivityIndicator color={getTextColor()} />
-      ) : (
-        <Text style={[styles.text, { color: getTextColor() }, textStyle]}>
-          {title}
-        </Text>
-      )}
+      <LinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.gradient}
+      >
+        {loading ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          <Text style={[styles.text, styles.gradientText, textStyle]}>
+            {title}
+          </Text>
+        )}
+      </LinearGradient>
     </TouchableOpacity>
   );
 };
@@ -63,20 +100,39 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
-    borderRadius: 12,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
   },
+  gradient: {
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glowWrap: {
+    borderRadius: 999,
+    ...GlowShadow,
+  },
   text: {
     fontSize: Typography.sizes.md,
-    fontWeight: '600',
+    fontWeight: Typography.weights.bold,
+  },
+  gradientText: {
+    color: '#FFFFFF',
   },
   outline: {
     borderWidth: 1.5,
-    borderColor: Colors.primary,
+    borderColor: Colors.primaryGlow,
+    backgroundColor: 'transparent',
+  },
+  ghost: {
+    backgroundColor: 'transparent',
   },
   disabled: {
-    opacity: 0.6,
+    opacity: 0.45,
+    borderRadius: 999,
   },
 });

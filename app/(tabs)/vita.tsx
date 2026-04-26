@@ -13,7 +13,7 @@ export default function VitaTabScreen() {
     <ScreenWrapper>
       <View style={styles.container}>
         <View style={styles.iconWrap}>
-          <Ionicons name="chatbubbles" size={64} color={Colors.primary} />
+          <Ionicons name="chatbubbles" size={64} color={Colors.primaryGlow} />
         </View>
         <Text style={styles.title}>Vita AI</Text>
         <Text style={styles.subtitle}>
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#EEEAFF',
+    backgroundColor: Colors.surfaceActive,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: Typography.sizes.xxxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.primary,
+    color: Colors.primaryGlow,
     marginBottom: Spacing.sm,
   },
   subtitle: {
@@ -72,14 +72,16 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   disclaimerWrap: {
-    backgroundColor: '#FFF3E0',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 107, 122, 0.12)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 122, 0.25)',
     paddingVertical: Spacing.sm + 2,
     paddingHorizontal: Spacing.md,
   },
   disclaimerText: {
     fontSize: Typography.sizes.xs,
-    color: Colors.text,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 18,
   },

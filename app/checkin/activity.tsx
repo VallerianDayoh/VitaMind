@@ -79,7 +79,7 @@ export default function ActivityCheckinScreen() {
             style={styles.durationBtn}
             onPress={() => setDurationStr(String(Math.max(0, duration - 5)))}
           >
-            <Ionicons name="remove-circle-outline" size={32} color={Colors.primary} />
+            <Ionicons name="remove-circle-outline" size={32} color={Colors.primaryGlow} />
           </TouchableOpacity>
 
           <TextInput
@@ -88,7 +88,7 @@ export default function ActivityCheckinScreen() {
             onChangeText={(t) => setDurationStr(t.replace(/[^0-9]/g, ''))}
             keyboardType="number-pad"
             placeholder="0"
-            placeholderTextColor={Colors.textSecondary}
+            placeholderTextColor="rgba(255,255,255,0.4)"
             maxLength={3}
           />
 
@@ -96,7 +96,7 @@ export default function ActivityCheckinScreen() {
             style={styles.durationBtn}
             onPress={() => setDurationStr(String(duration + 5))}
           >
-            <Ionicons name="add-circle-outline" size={32} color={Colors.primary} />
+            <Ionicons name="add-circle-outline" size={32} color={Colors.primaryGlow} />
           </TouchableOpacity>
         </View>
 
@@ -105,7 +105,7 @@ export default function ActivityCheckinScreen() {
             <Text style={styles.previewText}>
               {ACTIVITIES.find((a) => a.key === selected)?.icon ?? '🎯'}{' '}
               {ACTIVITIES.find((a) => a.key === selected)?.label ?? 'Aktivitas'} selama{' '}
-              <Text style={{ fontWeight: '700', color: Colors.primary }}>{duration} menit</Text>
+              <Text style={{ fontWeight: '700', color: Colors.primaryGlow }}>{duration} menit</Text>
             </Text>
           </View>
         )}
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.bold,
-    color: Colors.text,
+    color: Colors.textPrimary,
     textAlign: 'center',
     marginTop: Spacing.md,
     marginBottom: Spacing.lg,
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.medium,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
 
@@ -145,18 +145,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.sm + 2,
     paddingHorizontal: Spacing.md,
-    borderRadius: 24,
+    borderRadius: 999,
     backgroundColor: Colors.surface,
     borderWidth: 1.5,
     borderColor: Colors.border,
     gap: Spacing.xs,
   },
   pillActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryGlow,
+    borderColor: Colors.primaryGlow,
   },
   pillEmoji: { fontSize: 20 },
-  pillLabel: { fontSize: Typography.sizes.sm, color: Colors.text },
+  pillLabel: { fontSize: Typography.sizes.sm, color: Colors.textPrimary },
 
   // Duration
   durationRow: {
@@ -170,23 +170,23 @@ const styles = StyleSheet.create({
   durationInput: {
     fontSize: 42,
     fontWeight: '700',
-    color: Colors.text,
+    color: Colors.textPrimary,
     textAlign: 'center',
     minWidth: 100,
     borderBottomWidth: 2,
-    borderBottomColor: Colors.primary,
+    borderBottomColor: Colors.primaryGlow,
     paddingVertical: Spacing.sm,
   },
 
   previewBox: {
-    backgroundColor: '#EEEAFF',
-    borderRadius: 12,
+    backgroundColor: Colors.surfaceActive,
+    borderRadius: 16,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
     alignItems: 'center',
     marginBottom: Spacing.lg,
   },
-  previewText: { fontSize: Typography.sizes.md, color: Colors.text },
+  previewText: { fontSize: Typography.sizes.md, color: Colors.textPrimary },
 
   saveBtn: { marginTop: Spacing.sm },
 });

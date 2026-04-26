@@ -14,6 +14,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '../../components/ui/Button';
 import { Colors, Spacing, Typography } from '../../constants/theme';
 
@@ -74,7 +75,7 @@ const Dot: React.FC<DotProps> = ({ isActive }) => {
     width: width.value,
     height: 8,
     borderRadius: 4,
-    backgroundColor: isActive ? Colors.primary : Colors.border,
+    backgroundColor: isActive ? Colors.primaryGlow : 'rgba(255,255,255,0.2)',
     marginHorizontal: 4,
   }));
 
@@ -126,21 +127,21 @@ export default function OnboardingScreen() {
             <TextInput
               style={styles.formInput}
               placeholder="Nama Panggilan"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={nickname}
               onChangeText={setNickname}
             />
             <TextInput
               style={styles.formInput}
               placeholder="Jurusan (misal: Sistem Informasi)"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={major}
               onChangeText={setMajor}
             />
             <TextInput
               style={styles.formInput}
               placeholder="Semester (misal: 6)"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={semester}
               onChangeText={setSemester}
               keyboardType="number-pad"
@@ -167,7 +168,12 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={[Colors.backgroundTop, Colors.backgroundBottom]}
+      style={styles.container}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+    >
       <FlatList
         ref={flatRef}
         data={SLIDES}
@@ -193,12 +199,12 @@ export default function OnboardingScreen() {
         <Button
           title="Lewati"
           onPress={handleStart}
-          variant="outline"
+          variant="ghost"
           style={styles.skipBtn}
           textStyle={styles.skipText}
         />
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -207,7 +213,6 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
 
   // Slide
@@ -226,7 +231,7 @@ const styles = StyleSheet.create({
   slideTitle: {
     fontSize: Typography.sizes.xxxl,
     fontWeight: '800',
-    color: Colors.text,
+    color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: Spacing.md,
   },
@@ -250,13 +255,13 @@ const styles = StyleSheet.create({
   },
   formInput: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: Colors.border,
     paddingHorizontal: Spacing.md,
     paddingVertical: 14,
     fontSize: Typography.sizes.md,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
   startBtn: {
@@ -279,7 +284,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 56,
     right: 24,
-    borderColor: 'transparent',
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
