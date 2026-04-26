@@ -29,7 +29,8 @@ export default function VitaTabScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.disclaimerText}>
-            ⚠️ Vita bukan pengganti profesional. Jika kamu dalam krisis, hubungi{' '}
+            <Ionicons name="warning-outline" size={14} color={Colors.warning} />{' '}
+            Vita bukan pengganti profesional. Jika kamu dalam krisis, hubungi{' '}
             <Text style={styles.hotline}>119 ext 8</Text>.
           </Text>
         </TouchableOpacity>

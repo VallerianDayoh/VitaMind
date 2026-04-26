@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { Button } from '../../components/ui/Button';
 import { Colors, Typography, Spacing } from '../../constants/theme';
@@ -10,12 +11,12 @@ import { useAuthStore } from '../../store/authStore';
 import { Id } from '../../convex/_generated/dataModel';
 import { MoodType } from '../../types';
 
-const MOODS: { type: MoodType; emoji: string; label: string }[] = [
-  { type: 'awful', emoji: '😢', label: 'Sangat Buruk' },
-  { type: 'bad', emoji: '🙁', label: 'Buruk' },
-  { type: 'meh', emoji: '😐', label: 'Biasa' },
-  { type: 'good', emoji: '🙂', label: 'Baik' },
-  { type: 'rad', emoji: '😁', label: 'Sangat Baik' },
+const MOODS: { type: MoodType; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
+  { type: 'awful', icon: 'sad', label: 'Sangat Buruk' },
+  { type: 'bad', icon: 'sad-outline', label: 'Buruk' },
+  { type: 'meh', icon: 'remove-circle-outline', label: 'Biasa' },
+  { type: 'good', icon: 'happy-outline', label: 'Baik' },
+  { type: 'rad', icon: 'happy', label: 'Sangat Baik' },
 ];
 
 export default function MoodCheckinScreen() {
@@ -58,7 +59,12 @@ export default function MoodCheckinScreen() {
                 onPress={() => setSelected(m.type)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.moodEmoji}>{m.emoji}</Text>
+                <Ionicons
+                  name={m.icon}
+                  size={isActive ? 42 : 34}
+                  color={isActive ? Colors.primaryGlow : 'rgba(255,255,255,0.8)'}
+                  style={{ marginBottom: Spacing.xs }}
+                />
                 <Text
                   style={[
                     styles.moodLabel,
@@ -123,7 +129,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.primaryGlow,
     backgroundColor: Colors.surfaceActive,
   },
-  moodEmoji: { fontSize: 38, marginBottom: Spacing.xs },
+  moodEmoji: { marginBottom: Spacing.xs },
   moodLabel: {
     fontSize: Typography.sizes.xs,
     color: Colors.textSecondary,

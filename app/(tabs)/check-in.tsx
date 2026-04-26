@@ -40,7 +40,9 @@ export default function CheckInTabScreen() {
 
         {hasTodayData ? (
           <Card key="status" style={styles.statusCard}>
-            <Text style={styles.statusTitle}>✅ Sudah check-in hari ini</Text>
+            <Text style={styles.statusTitle}>
+              <Ionicons name="checkmark-circle" size={16} color={Colors.success} />{' '}Sudah check-in hari ini
+            </Text>
             <Text style={styles.statusSub}>
               {todayMood ? `Mood: ${todayMood.mood}` : ''}
               {todayMood && todaySleep ? ' • ' : ''}
@@ -49,7 +51,10 @@ export default function CheckInTabScreen() {
           </Card>
         ) : (
           <Card key="cta" style={[styles.statusCard, styles.ctaCard]} isActive>
-            <Text style={styles.ctaTitle}>💡 Ayo check perasaan kamu!</Text>
+            <View style={styles.ctaTitleWrap}>
+              <Ionicons name="bulb-outline" size={16} color={Colors.primaryGlow} />
+              <Text style={styles.ctaTitle}>Ayo check perasaan kamu!</Text>
+            </View>
             <Text style={styles.statusSub}>
               Bagaimana perasaan dan tidurmu semalam? Yuk, luangkan waktu sebentar.
             </Text>
@@ -63,7 +68,7 @@ export default function CheckInTabScreen() {
         />
 
         <Text style={styles.hint}>
-          Tidak harus mengisi semua — isi secepat yang kamu bisa 🙌
+          Tidak harus mengisi semua — isi secepat yang kamu bisa
         </Text>
       </View>
     </ScreenWrapper>
@@ -126,10 +131,15 @@ const styles = StyleSheet.create({
   ctaCard: {
     // isActive prop handles glow styling
   },
+  ctaTitleWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: 4,
+  },
   ctaTitle: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.bold,
     color: Colors.primaryGlow,
-    marginBottom: 4,
   },
 });

@@ -19,7 +19,7 @@ import { useRouter } from 'expo-router';
 import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -29,20 +29,20 @@ import { MoodType } from '../../types';
 
 // ── Data Constants ─────────────────────────────────────────
 
-const MOODS: { type: MoodType; emoji: string; label: string }[] = [
-  { type: 'awful', emoji: '😭', label: 'Sangat Buruk' },
-  { type: 'bad', emoji: '😟', label: 'Buruk' },
-  { type: 'meh', emoji: '😐', label: 'Biasa' },
-  { type: 'good', emoji: '😊', label: 'Baik' },
-  { type: 'rad', emoji: '🤩', label: 'Sangat Baik' },
+const MOODS: { type: MoodType; icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
+  { type: 'awful', icon: 'sad', label: 'Sangat Buruk' },
+  { type: 'bad', icon: 'sad-outline', label: 'Buruk' },
+  { type: 'meh', icon: 'remove-circle-outline', label: 'Biasa' },
+  { type: 'good', icon: 'happy-outline', label: 'Baik' },
+  { type: 'rad', icon: 'happy', label: 'Sangat Baik' },
 ];
 
 type SleepQuality = 'excellent' | 'good' | 'fair' | 'poor';
-const SLEEP_QUALITIES: { value: SleepQuality; label: string }[] = [
-  { value: 'excellent', label: 'Nyenyak' },
-  { value: 'good', label: 'Cukup' },
-  { value: 'fair', label: 'Gelisah' },
-  { value: 'poor', label: 'Insomnia' },
+const SLEEP_QUALITIES: { value: SleepQuality; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { value: 'excellent', label: 'Nyenyak', icon: 'moon' },
+  { value: 'good', label: 'Cukup', icon: 'happy-outline' },
+  { value: 'fair', label: 'Gelisah', icon: 'sad-outline' },
+  { value: 'poor', label: 'Insomnia', icon: 'alert-circle-outline' },
 ];
 
 const STRESS_OPTIONS = [
@@ -52,12 +52,12 @@ const STRESS_OPTIONS = [
   { value: 3, label: 'Sangat sering' },
 ];
 
-const ACTIVITIES = [
-  { key: 'exercise', label: 'Olahraga', icon: '🏋️' },
-  { key: 'walk', label: 'Jalan kaki', icon: '🚶' },
-  { key: 'yoga', label: 'Yoga', icon: '🧘' },
-  { key: 'cycle', label: 'Bersepeda', icon: '🚴' },
-  { key: 'other', label: 'Lainnya', icon: '🎯' },
+const ACTIVITIES: { key: string; label: string; icon: keyof typeof MaterialCommunityIcons.glyphMap }[] = [
+  { key: 'exercise', label: 'Olahraga', icon: 'dumbbell' },
+  { key: 'walk', label: 'Jalan kaki', icon: 'walk' },
+  { key: 'yoga', label: 'Yoga', icon: 'yoga' },
+  { key: 'cycle', label: 'Bersepeda', icon: 'bike' },
+  { key: 'other', label: 'Lainnya', icon: 'target' },
 ];
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
@@ -167,7 +167,7 @@ export default function UnifiedCheckinScreen() {
       }
 
       await Promise.all(promises);
-      Alert.alert('Tersimpan ✅', 'Check-in harian kamu berhasil dicatat!', [
+      Alert.alert('Tersimpan', 'Check-in harian kamu berhasil dicatat!', [
         { text: 'OK', onPress: () => router.back() },
       ]);
     } catch (err) {
@@ -238,7 +238,11 @@ export default function UnifiedCheckinScreen() {
                   onPress={() => setMood(m.type)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.moodEmoji}>{m.emoji}</Text>
+                  <Ionicons
+                    name={m.icon}
+                    size={active ? 36 : 30}
+                    color={active ? Colors.primaryGlow : 'rgba(255,255,255,0.8)'}
+                  />
                   <Text style={[styles.moodLabel, active && styles.moodLabelActive]}>
                     {m.label}
                   </Text>
@@ -286,6 +290,11 @@ export default function UnifiedCheckinScreen() {
                   onPress={() => setSleepQuality(q.value)}
                   activeOpacity={0.7}
                 >
+                  <Ionicons
+                    name={q.icon}
+                    size={active ? 18 : 16}
+                    color={active ? '#FFF' : 'rgba(255,255,255,0.8)'}
+                  />
                   <Text style={[styles.pillText, active && styles.pillTextActive]}>
                     {q.label}
                   </Text>
@@ -357,7 +366,11 @@ export default function UnifiedCheckinScreen() {
                     onPress={() => setActivity(a.key)}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.activityIcon}>{a.icon}</Text>
+                    <MaterialCommunityIcons
+                      name={a.icon}
+                      size={18}
+                      color={active ? '#FFF' : 'rgba(255,255,255,0.8)'}
+                    />
                     <Text style={[styles.activityLabel, active && { color: '#FFF', fontWeight: '700' }]}>
                       {a.label}
                     </Text>
@@ -447,7 +460,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.primaryGlow,
     backgroundColor: Colors.surfaceActive,
   },
-  moodEmoji: { fontSize: 34, marginBottom: 4 },
+  moodEmoji: { marginBottom: 4 },
   moodLabel: { fontSize: 10, color: Colors.textSecondary, textAlign: 'center' },
   moodLabelActive: { color: Colors.primaryGlow, fontWeight: '700' },
 
@@ -522,7 +535,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   pill: {
-    paddingVertical: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: Spacing.sm - 2,
     paddingHorizontal: Spacing.md,
     borderRadius: 999,
     backgroundColor: Colors.surface,
@@ -619,7 +635,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryGlow,
     borderColor: Colors.primaryGlow,
   },
-  activityIcon: { fontSize: 18 },
+  activityIcon: { },
   activityLabel: { fontSize: Typography.sizes.sm, color: Colors.textPrimary },
 
   durationRow: {

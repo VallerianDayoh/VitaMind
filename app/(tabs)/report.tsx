@@ -131,7 +131,7 @@ export default function ReportScreen() {
 
         <Card style={styles.insightCard} isActive>
           <View style={styles.insightHeader}>
-            <Text style={styles.insightIcon}>✨</Text>
+            <Ionicons name="sparkles" size={20} color={Colors.primaryGlow} />
             <Text style={styles.insightTitle}>Analisis Vita</Text>
           </View>
           {isGenerating ? (
@@ -329,10 +329,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Spacing.xs,
-    gap: 8,
-  },
-  insightIcon: {
-    fontSize: 20,
+    gap: Spacing.sm,
   },
   insightTitle: {
     fontSize: Typography.sizes.md,

@@ -76,9 +76,9 @@ export default function StressCheckinScreen() {
   };
 
   const getScoreLabel = () => {
-    if (totalScore <= 4) return 'Rendah 🙂';
-    if (totalScore <= 9) return 'Sedang 😐';
-    return 'Tinggi 😰';
+    if (totalScore <= 4) return 'Rendah';
+    if (totalScore <= 9) return 'Sedang';
+    return 'Tinggi';
   };
 
   const setAnswer = (qIndex: number, value: number) => {

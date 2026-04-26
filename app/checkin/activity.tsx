@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { Button } from '../../components/ui/Button';
 import { Colors, Typography, Spacing } from '../../constants/theme';
@@ -10,12 +10,12 @@ import { api } from '../../convex/_generated/api';
 import { useAuthStore } from '../../store/authStore';
 import { Id } from '../../convex/_generated/dataModel';
 
-const ACTIVITIES = [
-  { key: 'exercise', label: 'Olahraga', icon: '🏋️' },
-  { key: 'walk', label: 'Jalan kaki', icon: '🚶' },
-  { key: 'yoga', label: 'Yoga', icon: '🧘' },
-  { key: 'cycle', label: 'Bersepeda', icon: '🚴' },
-  { key: 'other', label: 'Lainnya', icon: '🎯' },
+const ACTIVITIES: { key: string; label: string; icon: keyof typeof MaterialCommunityIcons.glyphMap }[] = [
+  { key: 'exercise', label: 'Olahraga', icon: 'dumbbell' },
+  { key: 'walk', label: 'Jalan kaki', icon: 'walk' },
+  { key: 'yoga', label: 'Yoga', icon: 'yoga' },
+  { key: 'cycle', label: 'Bersepeda', icon: 'bike' },
+  { key: 'other', label: 'Lainnya', icon: 'target' },
 ];
 
 export default function ActivityCheckinScreen() {
@@ -63,7 +63,11 @@ export default function ActivityCheckinScreen() {
                 onPress={() => setSelected(a.key)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.pillEmoji}>{a.icon}</Text>
+                <MaterialCommunityIcons
+                  name={a.icon}
+                  size={20}
+                  color={active ? '#FFF' : 'rgba(255,255,255,0.8)'}
+                />
                 <Text style={[styles.pillLabel, active && { color: '#FFF', fontWeight: '700' }]}>
                   {a.label}
                 </Text>
@@ -103,7 +107,11 @@ export default function ActivityCheckinScreen() {
         {duration > 0 && (
           <View style={styles.previewBox}>
             <Text style={styles.previewText}>
-              {ACTIVITIES.find((a) => a.key === selected)?.icon ?? '🎯'}{' '}
+              <MaterialCommunityIcons
+                name={ACTIVITIES.find((a) => a.key === selected)?.icon ?? 'target'}
+                size={18}
+                color="rgba(255,255,255,0.8)"
+              />{' '}
               {ACTIVITIES.find((a) => a.key === selected)?.label ?? 'Aktivitas'} selama{' '}
               <Text style={{ fontWeight: '700', color: Colors.primaryGlow }}>{duration} menit</Text>
             </Text>
@@ -155,7 +163,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryGlow,
     borderColor: Colors.primaryGlow,
   },
-  pillEmoji: { fontSize: 20 },
+  pillEmoji: { },
   pillLabel: { fontSize: Typography.sizes.sm, color: Colors.textPrimary },
 
   // Duration

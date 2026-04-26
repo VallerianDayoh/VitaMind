@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from 'convex/react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -31,12 +31,12 @@ const getFormattedDate = (): string => {
   });
 };
 
-const MOOD_MAP: Record<MoodType, { emoji: string; label: string; color: string }> = {
-  rad: { emoji: '😁', label: 'Luar Biasa', color: '#5BFFB0' },
-  good: { emoji: '🙂', label: 'Baik', color: '#B388EB' },
-  meh: { emoji: '😐', label: 'Biasa', color: '#FFCF5C' },
-  bad: { emoji: '🙁', label: 'Buruk', color: '#FF9F5C' },
-  awful: { emoji: '😢', label: 'Sangat Buruk', color: '#FF6B7A' },
+const MOOD_MAP: Record<MoodType, { icon: keyof typeof Ionicons.glyphMap; label: string; color: string }> = {
+  rad: { icon: 'happy', label: 'Luar Biasa', color: '#5BFFB0' },
+  good: { icon: 'happy-outline', label: 'Baik', color: '#B388EB' },
+  meh: { icon: 'remove-circle-outline', label: 'Biasa', color: '#FFCF5C' },
+  bad: { icon: 'sad-outline', label: 'Buruk', color: '#FF9F5C' },
+  awful: { icon: 'sad', label: 'Sangat Buruk', color: '#FF6B7A' },
 };
 
 const QUICK_ACTIONS = [
@@ -101,11 +101,18 @@ export default function HomeScreen() {
 
         {/* ─── STREAK BANNER ──────────────────────────── */}
         <View style={[styles.streakBanner, streak > 0 ? styles.streakActive : styles.streakInactive]}>
-          <Text style={styles.streakText}>
-            {streak > 0
-              ? `🔥 ${streak} Hari Streak Check-in!`
-              : '💡 Jangan lupa check-in hari ini!'}
-          </Text>
+          <View style={styles.streakContent}>
+            <Ionicons
+              name={streak > 0 ? 'flame' : 'bulb-outline'}
+              size={18}
+              color={streak > 0 ? '#FFA500' : Colors.primaryGlow}
+            />
+            <Text style={styles.streakText}>
+              {streak > 0
+                ? `${streak} Hari Streak Check-in!`
+                : 'Jangan lupa check-in hari ini!'}
+            </Text>
+          </View>
         </View>
 
         {/* ─── 2. TODAY STATUS CARD ───────────────────── */}
@@ -115,9 +122,12 @@ export default function HomeScreen() {
             <View style={styles.statusGrid}>
               {todayMood && (
                 <View style={styles.statusItem}>
-                  <Text style={styles.statusEmoji}>
-                    {MOOD_MAP[todayMood.mood].emoji}
-                  </Text>
+                  <Ionicons
+                    name={MOOD_MAP[todayMood.mood].icon}
+                    size={32}
+                    color={MOOD_MAP[todayMood.mood].color}
+                    style={{ marginBottom: Spacing.xs }}
+                  />
                   <Text style={styles.statusLabel}>Mood</Text>
                   <Text
                     style={[
@@ -131,7 +141,7 @@ export default function HomeScreen() {
               )}
               {todaySleep && (
                 <View style={styles.statusItem}>
-                  <Text style={styles.statusEmoji}>😴</Text>
+                  <Feather name="moon" size={28} color={Colors.success} style={{ marginBottom: Spacing.xs }} />
                   <Text style={styles.statusLabel}>Tidur</Text>
                   <Text style={[styles.statusValue, { color: Colors.success }]}>
                     {todaySleep.durationInHours} jam
@@ -140,7 +150,7 @@ export default function HomeScreen() {
               )}
               {todayStress && (
                 <View style={styles.statusItem}>
-                  <Text style={styles.statusEmoji}>🧘</Text>
+                  <Feather name="activity" size={28} color={Colors.warning} style={{ marginBottom: Spacing.xs }} />
                   <Text style={styles.statusLabel}>Stres</Text>
                   <Text style={[styles.statusValue, { color: Colors.warning }]}>
                     Lv {todayStress.level}
@@ -195,9 +205,9 @@ export default function HomeScreen() {
           <View style={styles.chartArea}>
             {/* Y-axis labels */}
             <View style={styles.yAxis}>
-              <Text style={styles.axisLabel}>😁</Text>
-              <Text style={styles.axisLabel}>😐</Text>
-              <Text style={styles.axisLabel}>😢</Text>
+              <Ionicons name="happy-outline" size={16} color="rgba(255,255,255,0.6)" />
+              <Ionicons name="remove-circle-outline" size={16} color="rgba(255,255,255,0.6)" />
+              <Ionicons name="sad-outline" size={16} color="rgba(255,255,255,0.6)" />
             </View>
             {/* Bars */}
             <View style={styles.barsContainer}>
@@ -230,15 +240,18 @@ export default function HomeScreen() {
               })}
             </View>
           </View>
-          <Text style={styles.chartCaption}>
-            Mood kamu cenderung stabil minggu ini. Pertahankan! 💪
-          </Text>
+          <View style={styles.chartCaptionWrap}>
+            <Text style={styles.chartCaption}>
+              Mood kamu cenderung stabil minggu ini. Pertahankan!
+            </Text>
+            <Ionicons name="thumbs-up-outline" size={14} color={Colors.textSecondary} />
+          </View>
         </Card>
 
         {/* ─── 4. WEEKLY INSIGHT PREVIEW  ────── */}
         <Card style={styles.insightCard} isActive>
           <View style={styles.insightHeader}>
-            <Text style={styles.insightIcon}>✨</Text>
+            <Ionicons name="sparkles" size={20} color={Colors.primaryGlow} />
             <Text style={styles.insightTitle}>Insight Mingguan Tersedia</Text>
           </View>
           <Text style={styles.insightBody}>
@@ -292,6 +305,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderColor: Colors.border,
   },
+  streakContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
   streakText: {
     fontSize: Typography.sizes.sm,
     fontWeight: Typography.weights.medium,
@@ -316,10 +334,6 @@ const styles = StyleSheet.create({
   },
   statusItem: {
     alignItems: 'center',
-  },
-  statusEmoji: {
-    fontSize: 32,
-    marginBottom: Spacing.xs,
   },
   statusLabel: {
     fontSize: Typography.sizes.xs,
@@ -412,10 +426,16 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 4,
   },
+  chartCaptionWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md,
+    gap: Spacing.xs,
+  },
   chartCaption: {
     fontSize: Typography.sizes.sm,
     color: Colors.textSecondary,
-    marginTop: Spacing.md,
     textAlign: 'center',
   },
 
@@ -427,10 +447,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Spacing.sm,
-  },
-  insightIcon: {
-    fontSize: 22,
-    marginRight: Spacing.sm,
+    gap: Spacing.sm,
   },
   insightTitle: {
     fontSize: Typography.sizes.lg,

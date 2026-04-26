@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Keyboard, TouchableWithoutFeedback, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
@@ -56,7 +57,7 @@ export default function PersonalizationScreen() {
     <ScreenWrapper withKeyboard>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
-          <Text style={styles.emoji}>✨</Text>
+          <Ionicons name="sparkles" size={56} color={Colors.primaryGlow} style={styles.heroIcon} />
           <Text style={styles.title}>Personalisasi</Text>
           <Text style={styles.body}>Bantu kami mengenalmu lebih baik.</Text>
 
@@ -86,7 +87,7 @@ export default function PersonalizationScreen() {
           </View>
 
           <Button
-            title="Mulai Perjalanan 🚀"
+            title="Mulai Perjalanan"
             onPress={handleStart}
             loading={isLoading}
             style={styles.startBtn}
@@ -107,6 +108,9 @@ const styles = StyleSheet.create({
   },
   emoji: {
     fontSize: 72,
+    marginBottom: Spacing.lg,
+  },
+  heroIcon: {
     marginBottom: Spacing.lg,
   },
   title: {

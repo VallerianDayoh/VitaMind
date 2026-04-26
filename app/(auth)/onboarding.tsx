@@ -15,6 +15,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../../components/ui/Button';
 import { Colors, Spacing, Typography } from '../../constants/theme';
 
@@ -24,7 +25,7 @@ const { width: SCREEN_W } = Dimensions.get('window');
 
 interface SlideData {
   id: string;
-  emoji: string;
+  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   body: string;
   isForm?: boolean;
@@ -33,25 +34,25 @@ interface SlideData {
 const SLIDES: SlideData[] = [
   {
     id: '1',
-    emoji: '🫶',
+    icon: 'heart',
     title: 'Ruang Amanmu',
     body: 'Catat mood dan pola tidurmu setiap hari tanpa dihakimi. VitaMind menjaga semua ceritamu.',
   },
   {
     id: '2',
-    emoji: '💬',
+    icon: 'chatbubble-ellipses',
     title: 'Teman Cerita 24/7',
     body: 'Kenalkan Vita — AI chatbot empatik yang siap mendengar kapan pun kamu butuh teman bicara.',
   },
   {
     id: '3',
-    emoji: '🔒',
+    icon: 'lock-closed',
     title: 'Privasi Terjamin',
     body: 'Semua data dienkripsi end-to-end dan disimpan di Convex. Tidak akan pernah dibagikan ke pihak ketiga.',
   },
   {
     id: '4',
-    emoji: '✨',
+    icon: 'sparkles',
     title: 'Personalisasi',
     body: 'Bantu kami mengenalmu lebih baik.',
     isForm: true,
@@ -119,7 +120,7 @@ export default function OnboardingScreen() {
     if (item.isForm) {
       return (
         <View style={styles.slide}>
-          <Text style={styles.slideEmoji}>{item.emoji}</Text>
+          <Ionicons name={item.icon} size={56} color={Colors.primaryGlow} style={styles.slideIcon} />
           <Text style={styles.slideTitle}>{item.title}</Text>
           <Text style={styles.slideBody}>{item.body}</Text>
 
@@ -149,7 +150,7 @@ export default function OnboardingScreen() {
           </View>
 
           <Button
-            title="Mulai Perjalanan 🚀"
+            title="Mulai Perjalanan"
             onPress={handleStart}
             style={styles.startBtn}
           />
@@ -159,7 +160,7 @@ export default function OnboardingScreen() {
 
     return (
       <View style={styles.slide}>
-        <Text style={styles.slideEmoji}>{item.emoji}</Text>
+        <Ionicons name={item.icon} size={56} color={Colors.primaryGlow} style={styles.slideIcon} />
         <Text style={styles.slideTitle}>{item.title}</Text>
         <Text style={styles.slideBody}>{item.body}</Text>
         <Button title="Lanjut" onPress={goNext} variant="outline" style={styles.nextBtn} />
@@ -226,6 +227,9 @@ const styles = StyleSheet.create({
   },
   slideEmoji: {
     fontSize: 72,
+    marginBottom: Spacing.lg,
+  },
+  slideIcon: {
     marginBottom: Spacing.lg,
   },
   slideTitle: {

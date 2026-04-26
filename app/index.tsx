@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -65,7 +66,7 @@ export default function SplashScreen() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Text style={styles.iconText}>🧠</Text>
+          <MaterialCommunityIcons name="brain" size={52} color="#FFFFFF" />
         </LinearGradient>
         <Text style={styles.brand}>VitaMind</Text>
         <Text style={styles.tagline}>Jaga jiwamu, selangkah demi selangkah.</Text>

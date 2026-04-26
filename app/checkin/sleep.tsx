@@ -1,25 +1,25 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
-import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Colors, Typography, Spacing } from '../../constants/theme';
 import { useMutation } from 'convex/react';
+import { useRouter } from 'expo-router';
+import React, { useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
+import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
+import { Colors, Spacing, Typography } from '../../constants/theme';
 import { api } from '../../convex/_generated/api';
-import { useAuthStore } from '../../store/authStore';
 import { Id } from '../../convex/_generated/dataModel';
+import { useAuthStore } from '../../store/authStore';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
 
 type SleepQuality = 'excellent' | 'good' | 'fair' | 'poor';
-const QUALITIES: { value: SleepQuality; label: string; icon: string }[] = [
-  { value: 'excellent', label: 'Nyenyak', icon: '😴' },
-  { value: 'good', label: 'Cukup', icon: '🙂' },
-  { value: 'fair', label: 'Gelisah', icon: '😕' },
-  { value: 'poor', label: 'Insomnia', icon: '😵' },
+const QUALITIES: { value: SleepQuality; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { value: 'excellent', label: 'Nyenyak', icon: 'moon' },
+  { value: 'good', label: 'Cukup', icon: 'happy-outline' },
+  { value: 'fair', label: 'Gelisah', icon: 'sad-outline' },
+  { value: 'poor', label: 'Insomnia', icon: 'alert-circle-outline' },
 ];
 
 export default function SleepCheckinScreen() {
@@ -108,7 +108,12 @@ export default function SleepCheckinScreen() {
                 onPress={() => setQuality(q.value)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.qualityIcon}>{q.icon}</Text>
+                <Ionicons
+                  name={q.icon}
+                  size={active ? 30 : 26}
+                  color={active ? Colors.primaryGlow : 'rgba(255,255,255,0.8)'}
+                  style={{ marginBottom: Spacing.xs }}
+                />
                 <Text style={[styles.qualityLabel, active && { color: Colors.primaryGlow, fontWeight: '700' }]}>
                   {q.label}
                 </Text>

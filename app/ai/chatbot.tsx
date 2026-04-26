@@ -193,7 +193,8 @@ export default function VitaChatbotScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.disclaimerText}>
-            ⚠️ Vita adalah teman virtual, bukan psikolog. Jika butuh bantuan profesional,{' '}
+            <Ionicons name="warning-outline" size={14} color={Colors.warning} />{' '}
+            Vita adalah teman virtual, bukan psikolog. Jika butuh bantuan profesional,{' '}
             <Text style={styles.disclaimerLink}>tap di sini.</Text>
           </Text>
         </TouchableOpacity>
