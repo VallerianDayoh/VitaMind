@@ -45,7 +45,7 @@ export default function ReportScreen() {
   const dynamicStressData = processStressChartData(stressLogs);
 
   // Gemini Insight State (Manual Trigger)
-  const fetchInsight = useAction(api.gemini.generateInsight);
+  const fetchInsight = useAction(api.ai.generateInsight);
   const [insightText, setInsightText] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
 

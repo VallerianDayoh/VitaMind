@@ -51,7 +51,7 @@ export default function VitaChatbotScreen() {
     convexUserId ? { userId } : "skip"
   );
   const sendChatMsg = useMutation(api.chat.send);
-  const askVita = useAction(api.gemini.chat);
+  const askVita = useAction(api.ai.chat);
 
   // Transform Convex data to local Message format
   const messages: Message[] = [
@@ -100,7 +100,7 @@ export default function VitaChatbotScreen() {
         .map((m) => `${m.sender === 'user' ? 'User' : 'Vita'}: ${m.text}`)
         .join('\n');
 
-      // 4. Call Gemini AI via Convex action
+      // 4. Call AI via Convex action
       const aiResponse = await askVita({
         userMessage: trimmed,
         conversationHistory: historyStr || undefined,

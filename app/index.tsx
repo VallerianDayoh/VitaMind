@@ -60,7 +60,7 @@ export default function SplashScreen() {
         <Text style={styles.tagline}>Jaga jiwamu, selangkah demi selangkah.</Text>
       </Animated.View>
 
-      <Text style={styles.footer}>Powered by Convex & Gemini AI</Text>
+      <Text style={styles.footer}>Powered by Convex & Vita AI</Text>
     </View>
   );
 }

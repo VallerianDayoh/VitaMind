@@ -9,8 +9,8 @@
  */
 
 import type * as activityLogs from "../activityLogs.js";
+import type * as ai from "../ai.js";
 import type * as chat from "../chat.js";
-import type * as gemini from "../gemini.js";
 import type * as logs from "../logs.js";
 import type * as messages from "../messages.js";
 import type * as moodLogs from "../moodLogs.js";
@@ -27,8 +27,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   activityLogs: typeof activityLogs;
+  ai: typeof ai;
   chat: typeof chat;
-  gemini: typeof gemini;
   logs: typeof logs;
   messages: typeof messages;
   moodLogs: typeof moodLogs;

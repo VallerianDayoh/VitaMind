@@ -19,7 +19,7 @@ export const chat = action({
     conversationHistory: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY; // Fallback for env names
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) throw new Error("API Key belum diset di Convex environment!");
 
     const messages = [];
@@ -52,9 +52,9 @@ export const chat = action({
       "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
-        headers: { 
+        headers: {
           "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json" 
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           model: "llama-3.1-8b-instant", // Groq fast model
@@ -90,7 +90,7 @@ export const generateInsight = action({
     stressLogs: v.array(v.any()),
   },
   handler: async (ctx, args) => {
-    const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) throw new Error("API Key belum diset!");
 
     // Optimalisasi Payload Data: Hanya ambil core value
@@ -100,23 +100,33 @@ export const generateInsight = action({
     const cleanStress = args.stressLogs.map((l: any) => ({ level: l.level, dl: l.hasDeadline }));
 
     const systemPrompt = `Kamu adalah analis kesehatan mental dan wellbeing untuk mahasiswa.`;
-    const userPrompt = `Tugasmu: Buat satu paragraf singkat (maksimal 3-4 kalimat) berisi insight dari data check-in mingguan user bernama ${args.userName}.
-Pilih kata-kata yang hangat, empatik, dan analitis. Jika tidur < 7 jam atau stres tinggi, berikan saran praktis (misal: kurangi kafein, peregangan) dan hubungkan empatimu dengan kemungkinan padatnya beban akademik, deadline, atau UKM. Jika tren data baik, berikan apresiasi atas konsistensinya.
+    const userPrompt = `Tugasmu: Buat analisis mingguan yang hangat, empatik, dan analitis dari data check-in user bernama ${args.userName}.
+
+PENTING - FORMAT OUTPUT:
+- JANGAN gunakan format markdown seperti bintang/asterisk (**teks**) sama sekali. Hasilkan teks biasa saja (plaintext).
+- JANGAN buat subjudul atau poin-poin kaku (seperti "Analisis Tidur:", "Observasi Utama:"). Mengalirlah seperti sedang berbicara.
+- Tulis dalam 2 atau 3 paragraf pendek yang dipisahkan oleh 1 baris kosong (Enter/Newline).
+- Gunakan 1 atau 2 emoji yang pas di setiap paragraf agar terasa lebih peduli dan bersahabat.
+
+PANDUAN KONTEN:
+1. Sapa nama user langsung dan berikan simpulan observasi dari tren datanya.
+2. Jika tidur < 7 jam atau stres tinggi: Berikan saran praktis. Hubungkan empatimu dengan kemungkinan padatnya beban akademik kuliah, tugas, atau himpunan.
+3. Jika tren data baik: Salut dan apresiasi konsistensinya.
 
 Data 7 hari terakhir (Berurutan):
 - Tren Mood (Skala 1-Awful s/d 5-Rad): ${JSON.stringify(cleanMood)}
 - Tren Tidur (Jam/hari): ${JSON.stringify(cleanSleep)}
 - Tren Stress (Level dan ada deadline): ${JSON.stringify(cleanStress)}
 
-Tulis HANYA paragraf analisisnya, langsung sapa namanya, tanpa pembuka/penutup basa-basi.`;
+Tulis HANYA paragraf analisisnya saja, tanpa kalimat pengantar/penutup basa-basi.`;
 
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
-        headers: { 
+        headers: {
           "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json" 
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           model: "llama-3.1-8b-instant", // Groq fast model
@@ -124,7 +134,7 @@ Tulis HANYA paragraf analisisnya, langsung sapa namanya, tanpa pembuka/penutup b
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt }
           ],
-          temperature: 0.7, 
+          temperature: 0.7,
           max_tokens: 350
         }),
       }
