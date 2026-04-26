@@ -1,6 +1,7 @@
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from 'convex/react';
 import { LinearGradient } from 'expo-linear-gradient';
+import { LineChart } from 'react-native-gifted-charts';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -209,35 +210,37 @@ export default function HomeScreen() {
               <Ionicons name="remove-circle-outline" size={16} color="rgba(255,255,255,0.6)" />
               <Ionicons name="sad-outline" size={16} color="rgba(255,255,255,0.6)" />
             </View>
-            {/* Bars */}
             <View style={styles.barsContainer}>
-              {MOOD_TREND_7D.map((val, i) => {
-                const barH = (val / 5) * CHART_HEIGHT;
-                const barColor =
-                  val >= 4
-                    ? Colors.success
-                    : val >= 3
-                      ? Colors.primaryGlow
-                      : val >= 2
-                        ? Colors.warning
-                        : Colors.error;
-                return (
-                  <View key={i} style={styles.barCol}>
-                    <View style={styles.barTrack}>
-                      <LinearGradient
-                        colors={[barColor, barColor + '60']}
-                        style={[
-                          styles.bar,
-                          { height: barH },
-                        ]}
-                        start={{ x: 0.5, y: 0 }}
-                        end={{ x: 0.5, y: 1 }}
-                      />
-                    </View>
-                    <Text style={styles.barLabel}>{DAYS_LABEL[i]}</Text>
-                  </View>
-                );
-              })}
+              <LineChart
+                data={MOOD_TREND_7D.map((val, i) => ({
+                  value: val,
+                  label: DAYS_LABEL[i],
+                  customDataPoint: () => {
+                    const dotColor = val <= 2 ? Colors.error : val >= 4 ? Colors.success : Colors.warning;
+                    return (
+                      <View style={{
+                        width: 12, height: 12, borderRadius: 6, backgroundColor: dotColor,
+                        borderWidth: 2, borderColor: Colors.surface
+                      }} />
+                    );
+                  }
+                }))}
+                showLine={true}
+                curved={true}
+                color={Colors.primaryGlow}
+                thickness={2}
+                height={CHART_HEIGHT}
+                maxValue={5}
+                noOfSections={5}
+                hideRules={true}
+                hideYAxisText={true}
+                yAxisColor="transparent"
+                xAxisColor="transparent"
+                spacing={46}
+                initialSpacing={20}
+                xAxisLabelTextStyle={{ color: Colors.textSecondary, fontSize: 10, marginTop: 4, width: 40, textAlign: 'center' }}
+                isAnimated={true}
+              />
             </View>
           </View>
           <View style={styles.chartCaptionWrap}>
@@ -405,26 +408,7 @@ const styles = StyleSheet.create({
   },
   barsContainer: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'flex-end',
-  },
-  barCol: {
-    alignItems: 'center',
-  },
-  barTrack: {
-    height: CHART_HEIGHT,
-    justifyContent: 'flex-end',
-  },
-  bar: {
-    width: 22,
-    borderRadius: 8,
-    minHeight: 6,
-  },
-  barLabel: {
-    fontSize: Typography.sizes.xs,
-    color: Colors.textSecondary,
-    marginTop: 4,
+    overflow: 'hidden',
   },
   chartCaptionWrap: {
     flexDirection: 'row',

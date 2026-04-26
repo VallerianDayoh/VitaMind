@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useAction } from 'convex/react';
 import { LinearGradient } from 'expo-linear-gradient';
+import { LineChart, BarChart } from 'react-native-gifted-charts';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { useAuthStore } from '../../store/authStore';
@@ -166,19 +167,37 @@ export default function ReportScreen() {
           <Text style={styles.chartTitle}>Tren Mood</Text>
           <Text style={styles.chartSubtitle}>Skala 1 (Sangat Buruk) - 5 (Sangat Baik)</Text>
           {filter === 'week' && hasData ? (
-            <View style={styles.chartPlot}>
-              {dynamicMoodData.map((d, i) => {
-                const bottomPos = (d.value / 5) * CHART_HEIGHT;
-                const dotColor = d.value <= 2 ? Colors.error : d.value >= 4 ? Colors.success : Colors.warning;
-                return (
-                  <View key={`mood-${i}`} style={styles.chartColumn}>
-                    <View style={[styles.dotWrapper, { height: CHART_HEIGHT }]}>
-                      <View style={[styles.pointDot, { bottom: bottomPos, backgroundColor: dotColor }]} />
-                    </View>
-                    <Text style={styles.chartXLabel}>{d.label}</Text>
-                  </View>
-                );
-              })}
+            <View style={{ paddingTop: 16 }}>
+              <LineChart
+                data={dynamicMoodData.map((d) => ({
+                  value: d.value,
+                  label: d.label,
+                  customDataPoint: () => {
+                    const dotColor = d.value <= 2 ? Colors.error : d.value >= 4 ? Colors.success : Colors.warning;
+                    return (
+                      <View style={{
+                        width: 12, height: 12, borderRadius: 6, backgroundColor: dotColor,
+                        borderWidth: 2, borderColor: Colors.surface
+                      }} />
+                    );
+                  }
+                }))}
+                showLine={true}
+                curved={true}
+                color={Colors.primaryGlow}
+                thickness={2}
+                height={CHART_HEIGHT}
+                maxValue={5}
+                noOfSections={5}
+                hideRules={true}
+                hideYAxisText={true}
+                yAxisColor={Colors.border}
+                xAxisColor={Colors.border}
+                spacing={46}
+                initialSpacing={20}
+                xAxisLabelTextStyle={{ color: Colors.textSecondary, fontSize: 10, marginTop: 4, width: 40, textAlign: 'center' }}
+                isAnimated={true}
+              />
             </View>
           ) : (
             renderEmptyState()
@@ -190,25 +209,40 @@ export default function ReportScreen() {
           <Text style={styles.chartTitle}>Pola Tidur</Text>
           <Text style={styles.chartSubtitle}>Durasi tidur harian (Target: 8 Jam)</Text>
           {filter === 'week' && hasData ? (
-            <View style={styles.chartPlot}>
-              <View style={[styles.targetLine, { bottom: (8 / 10) * CHART_HEIGHT }]} />
-              {dynamicSleepData.map((d, i) => {
-                const barH = (d.value / 10) * CHART_HEIGHT;
-                const barColor = d.value < 6 ? Colors.error : Colors.primaryGlow;
-                return (
-                  <View key={`sleep-${i}`} style={styles.chartColumn}>
-                    <View style={[styles.barWrapper, { height: CHART_HEIGHT }]}>
-                      <LinearGradient
-                        colors={[barColor, barColor + '40']}
-                        style={[styles.verticalBar, { height: barH }]}
-                        start={{ x: 0.5, y: 0 }}
-                        end={{ x: 0.5, y: 1 }}
-                      />
-                    </View>
-                    <Text style={styles.chartXLabel}>{d.label}</Text>
-                  </View>
-                );
-              })}
+            <View style={{ paddingTop: 16 }}>
+              <BarChart
+                data={dynamicSleepData.map((d) => {
+                  const barColor = d.value < 6 ? Colors.error : Colors.primaryGlow;
+                  return {
+                    value: d.value,
+                    label: d.label,
+                    frontColor: barColor,
+                    gradientColor: barColor + '40',
+                  };
+                })}
+                showGradient={true}
+                height={CHART_HEIGHT}
+                maxValue={10}
+                noOfSections={5}
+                hideRules={true}
+                hideYAxisText={true}
+                yAxisColor={Colors.border}
+                xAxisColor={Colors.border}
+                spacing={46}
+                initialSpacing={20}
+                barWidth={18}
+                barBorderRadius={6}
+                xAxisLabelTextStyle={{ color: Colors.textSecondary, fontSize: 10, marginTop: 4, width: 40, textAlign: 'center' }}
+                isAnimated={true}
+                showReferenceLine1={true}
+                referenceLine1Position={8}
+                referenceLine1Config={{
+                  color: Colors.success,
+                  dashWidth: 4,
+                  dashGap: 4,
+                  thickness: 1,
+                }}
+              />
             </View>
           ) : (
             renderEmptyState()
@@ -220,24 +254,58 @@ export default function ReportScreen() {
           <Text style={styles.chartTitle}>Level Stres & Akademik</Text>
           <Text style={styles.chartSubtitle}>Skor PSS (0-15)</Text>
           {filter === 'week' && hasData ? (
-            <View style={styles.chartPlot}>
-              {dynamicStressData.map((d, i) => {
-                const bottomPos = (d.value / 15) * CHART_HEIGHT;
-                return (
-                  <View key={`stress-${i}`} style={styles.chartColumn}>
-                    <View style={[styles.dotWrapper, { height: CHART_HEIGHT }]}>
-                      <View style={[styles.pointDot, { bottom: bottomPos, backgroundColor: Colors.secondary }]} />
-                      {/* Anotasi Spesifik */}
-                      {d.annotation && (
-                        <View style={[styles.annotationBox, { bottom: bottomPos + 8 }]}>
-                          <Text style={styles.annotationText} numberOfLines={2}>{d.annotation}</Text>
+            <View style={{ paddingTop: 16 }}>
+              <LineChart
+                data={dynamicStressData.map((d) => ({
+                  value: d.value,
+                  label: d.label,
+                  customDataPoint: () => {
+                    if (d.annotation) {
+                      return (
+                        <View style={{
+                          width: 14, height: 14, borderRadius: 7, backgroundColor: Colors.secondary,
+                          borderWidth: 3, borderColor: Colors.error, alignItems: 'center', justifyContent: 'center'
+                        }} />
+                      );
+                    }
+                    return (
+                      <View style={{
+                        width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.secondary,
+                        borderWidth: 2, borderColor: Colors.surface
+                      }} />
+                    );
+                  },
+                  dataPointLabelComponent: () => {
+                    if (d.annotation) {
+                      return (
+                        <View style={{ position: 'absolute', top: -16, left: -6 }}>
+                          <Ionicons name="warning" size={14} color={Colors.error} />
                         </View>
-                      )}
-                    </View>
-                    <Text style={styles.chartXLabel}>{d.label}</Text>
-                  </View>
-                );
-              })}
+                      );
+                    }
+                    return null;
+                  }
+                }))}
+                showLine={true}
+                curved={true}
+                color={Colors.primaryGlow}
+                thickness={2}
+                height={CHART_HEIGHT}
+                maxValue={15}
+                noOfSections={5}
+                hideRules={true}
+                hideYAxisText={true}
+                yAxisColor={Colors.border}
+                xAxisColor={Colors.border}
+                spacing={46}
+                initialSpacing={20}
+                xAxisLabelTextStyle={{ color: Colors.textSecondary, fontSize: 10, marginTop: 4, width: 40, textAlign: 'center' }}
+                isAnimated={true}
+              />
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, justifyContent: 'center', gap: 6 }}>
+                <Ionicons name="warning" size={14} color={Colors.error} />
+                <Text style={{ fontSize: 11, color: Colors.textSecondary }}>Ada deadline/ujian terkait</Text>
+              </View>
             </View>
           ) : (
             renderEmptyState()
@@ -373,80 +441,6 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.xs,
     color: Colors.textSecondary,
     marginBottom: Spacing.md,
-  },
-  chartPlot: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: CHART_HEIGHT + 30, // Plot + Label Space
-  },
-  chartColumn: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  chartXLabel: {
-    fontSize: 10,
-    color: Colors.textSecondary,
-    marginTop: 8,
-  },
-  
-  // Point/Scatter Chart Specific (Mood & Stress)
-  dotWrapper: {
-    width: '100%',
-    alignItems: 'center',
-    position: 'relative',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  pointDot: {
-    position: 'absolute',
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    zIndex: 2,
-    backgroundColor: Colors.primaryGlow,
-  },
-
-  // Bar Chart Specific (Sleep)
-  barWrapper: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  verticalBar: {
-    width: 18,
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
-  },
-  targetLine: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 1,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.success,
-    borderStyle: 'dashed',
-    zIndex: 1,
-  },
-
-  // Annotations
-  annotationBox: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 4,
-    zIndex: 10,
-    minWidth: 40,
-    alignItems: 'center',
-  },
-  annotationText: {
-    color: Colors.textPrimary,
-    fontSize: 7,
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
 
   // Error/Empty state
