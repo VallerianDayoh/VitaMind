@@ -14,6 +14,7 @@ import type * as gemini from "../gemini.js";
 import type * as logs from "../logs.js";
 import type * as messages from "../messages.js";
 import type * as moodLogs from "../moodLogs.js";
+import type * as seedData from "../seedData.js";
 import type * as sleepLogs from "../sleepLogs.js";
 import type * as stressLogs from "../stressLogs.js";
 import type * as users from "../users.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   logs: typeof logs;
   messages: typeof messages;
   moodLogs: typeof moodLogs;
+  seedData: typeof seedData;
   sleepLogs: typeof sleepLogs;
   stressLogs: typeof stressLogs;
   users: typeof users;

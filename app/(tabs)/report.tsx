@@ -142,7 +142,13 @@ export default function ReportScreen() {
               <Text style={[styles.insightText, { fontStyle: 'italic' }]}>Vita sedang membaca datamu...</Text>
             </View>
           ) : insightText ? (
-            <Text style={styles.insightText}>{insightText}</Text>
+            <View>
+              <Text style={styles.insightText}>{insightText}</Text>
+              <TouchableOpacity onPress={handleGenerateInsight} style={styles.regenerateBtn} activeOpacity={0.7}>
+                <Ionicons name="refresh-outline" size={16} color={Colors.primary} />
+                <Text style={styles.regenerateText}>Buat Ulang Analisis</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             <View>
               <Text style={styles.insightText}>
@@ -337,6 +343,24 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.sm,
     color: Colors.text,
     lineHeight: 22,
+  },
+  regenerateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginTop: Spacing.md,
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: Colors.primary + '40',
+  },
+  regenerateText: {
+    fontSize: Typography.sizes.sm,
+    color: Colors.primary,
+    fontWeight: Typography.weights.medium,
   },
 
   // Chart general config

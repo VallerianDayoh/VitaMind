@@ -5,6 +5,10 @@ import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Colors, Typography, Spacing } from '../../constants/theme';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { useAuthStore } from '../../store/authStore';
+import { Id } from '../../convex/_generated/dataModel';
 
 const PSS_QUESTIONS = [
   'Seberapa sering kamu merasa kewalahan dengan tugas-tugasmu?',
@@ -23,6 +27,8 @@ const SCALE_OPTIONS = [
 
 export default function StressCheckinScreen() {
   const router = useRouter();
+  const convexUserId = useAuthStore((s) => s.convexUserId);
+  const addStressLog = useMutation(api.stressLogs.add);
   const [answers, setAnswers] = useState<number[]>(new Array(PSS_QUESTIONS.length).fill(-1));
   const [hasDeadline, setHasDeadline] = useState(false);
 
@@ -53,10 +59,20 @@ export default function StressCheckinScreen() {
     });
   };
 
-  const handleSave = () => {
-    // In the future, save to dataStore
-    alert(`Skor stres: ${totalScore}/15 (${getScoreLabel()})`);
-    router.back();
+  const handleSave = async () => {
+    if (!convexUserId) return;
+    try {
+      await addStressLog({
+        userId: convexUserId as Id<"users">,
+        level: totalScore,
+        hasDeadline,
+      });
+      alert(`Skor stres: ${totalScore}/15 (${getScoreLabel()})\nBerhasil dicatat!`);
+      router.back();
+    } catch (error) {
+      console.error('Failed to save stress log:', error);
+      alert('Gagal menyimpan catatan stres.');
+    }
   };
 
   return (

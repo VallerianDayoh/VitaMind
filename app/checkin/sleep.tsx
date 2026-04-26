@@ -6,7 +6,10 @@ import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Colors, Typography, Spacing } from '../../constants/theme';
-import { useDataStore } from '../../store/dataStore';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { useAuthStore } from '../../store/authStore';
+import { Id } from '../../convex/_generated/dataModel';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
 const MINUTES = ['00', '15', '30', '45'];
@@ -21,7 +24,8 @@ const QUALITIES: { value: SleepQuality; label: string; icon: string }[] = [
 
 export default function SleepCheckinScreen() {
   const router = useRouter();
-  const addSleepLog = useDataStore((s) => s.addSleepLog);
+  const convexUserId = useAuthStore((s) => s.convexUserId);
+  const addSleepLog = useMutation(api.sleepLogs.add);
 
   const [bedH, setBedH] = useState('22');
   const [bedM, setBedM] = useState('30');
@@ -39,18 +43,22 @@ export default function SleepCheckinScreen() {
     return { h, m, total: diff / 60 };
   }, [bedH, bedM, wakeH, wakeM]);
 
-  const handleSave = () => {
-    if (!quality) return;
-    addSleepLog({
-      _id: Date.now().toString(),
-      userId: 'current-user',
-      durationInHours: Math.round(duration.total * 10) / 10,
-      quality,
-      bedTime: `${bedH}:${bedM}`,
-      wakeTime: `${wakeH}:${wakeM}`,
-      date: new Date().toISOString().split('T')[0],
-    });
-    router.back();
+  const handleSave = async () => {
+    if (!quality || !convexUserId) return;
+    try {
+      await addSleepLog({
+        userId: convexUserId as Id<"users">,
+        durationInHours: Math.round(duration.total * 10) / 10,
+        quality,
+        bedTime: `${bedH}:${bedM}`,
+        wakeTime: `${wakeH}:${wakeM}`,
+        date: new Date().toISOString().split('T')[0],
+      });
+      router.back();
+    } catch (error) {
+      console.error('Failed to save sleep log:', error);
+      alert('Gagal menyimpan catatan tidur.');
+    }
   };
 
   return (

@@ -6,11 +6,18 @@ import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Colors, Typography, Spacing } from '../../constants/theme';
-import { useDataStore } from '../../store/dataStore';
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { useAuthStore } from '../../store/authStore';
+import { Id } from '../../convex/_generated/dataModel';
 
 export default function CheckInTabScreen() {
   const router = useRouter();
-  const { moodLogs, sleepLogs } = useDataStore();
+  const convexUserId = useAuthStore((s) => s.convexUserId);
+  const userId = convexUserId as Id<"users">;
+
+  const moodLogs = useQuery(api.moodLogs.getByUser, convexUserId ? { userId } : "skip") || [];
+  const sleepLogs = useQuery(api.sleepLogs.getByUser, convexUserId ? { userId } : "skip") || [];
 
   const todayDate = new Date().toISOString().split('T')[0];
   const todayMood = moodLogs.find(
@@ -31,13 +38,20 @@ export default function CheckInTabScreen() {
           Catat mood, tidur, stres, dan aktivitasmu{'\n'}dalam satu langkah cepat.
         </Text>
 
-        {hasTodayData && (
-          <Card style={styles.statusCard}>
+        {hasTodayData ? (
+          <Card key="status" style={styles.statusCard}>
             <Text style={styles.statusTitle}>✅ Sudah check-in hari ini</Text>
             <Text style={styles.statusSub}>
               {todayMood ? `Mood: ${todayMood.mood}` : ''}
               {todayMood && todaySleep ? ' • ' : ''}
               {todaySleep ? `Tidur: ${todaySleep.durationInHours} jam` : ''}
+            </Text>
+          </Card>
+        ) : (
+          <Card key="cta" style={[styles.statusCard, styles.ctaCard]}>
+            <Text style={styles.ctaTitle}>💡 Ayo check perasaan kamu!</Text>
+            <Text style={styles.statusSub}>
+              Bagaimana perasaan dan tidurmu semalam? Yuk, luangkan waktu sebentar.
             </Text>
           </Card>
         )}
@@ -86,7 +100,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   statusCard: {
-    width: '100%',
+    alignSelf: 'stretch',
     alignItems: 'center',
     marginBottom: Spacing.lg,
   },
@@ -101,12 +115,23 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   startBtn: {
-    width: '100%',
+    alignSelf: 'stretch',
     marginBottom: Spacing.md,
   },
   hint: {
     fontSize: Typography.sizes.xs,
     color: Colors.textSecondary,
     textAlign: 'center',
+  },
+  ctaCard: {
+    backgroundColor: '#F8F9FE',
+    borderColor: Colors.primary,
+    borderWidth: 1,
+  },
+  ctaTitle: {
+    fontSize: Typography.sizes.md,
+    fontWeight: Typography.weights.bold,
+    color: Colors.primary,
+    marginBottom: 4,
   },
 });

@@ -73,7 +73,14 @@ export default function HomeScreen() {
   const hasTodayData = !!(todayMood || todaySleep || todayStress);
 
   // Dynamic Chart Data
-  const recent7 = [...moodLogs.slice(0, 7)].reverse();
+  const groupedMoods = new Map<string, typeof moodLogs[0]>();
+  for (const log of moodLogs) {
+    const dateStr = new Date(log.timestamp || log._creationTime).toISOString().split('T')[0];
+    if (!groupedMoods.has(dateStr)) {
+      groupedMoods.set(dateStr, log); // Takes the most recent per day
+    }
+  }
+  const recent7 = Array.from(groupedMoods.values()).slice(0, 7).reverse();
   const MOOD_TREND_7D = recent7.map(m => MOOD_SCORE[m.mood] || 3);
   const DAYS_LABEL = recent7.map(m => new Date(m.timestamp || m._creationTime).toLocaleDateString('id-ID', { weekday: 'short' }));
 

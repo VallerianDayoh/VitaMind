@@ -4,7 +4,10 @@ import { useRouter } from 'expo-router';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { Button } from '../../components/ui/Button';
 import { Colors, Typography, Spacing } from '../../constants/theme';
-import { useDataStore } from '../../store/dataStore';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { useAuthStore } from '../../store/authStore';
+import { Id } from '../../convex/_generated/dataModel';
 import { MoodType } from '../../types';
 
 const MOODS: { type: MoodType; emoji: string; label: string }[] = [
@@ -17,20 +20,24 @@ const MOODS: { type: MoodType; emoji: string; label: string }[] = [
 
 export default function MoodCheckinScreen() {
   const router = useRouter();
-  const addMoodLog = useDataStore((s) => s.addMoodLog);
+  const convexUserId = useAuthStore((s) => s.convexUserId);
+  const addMoodLog = useMutation(api.moodLogs.add);
   const [selected, setSelected] = useState<MoodType | null>(null);
   const [note, setNote] = useState('');
 
-  const handleSave = () => {
-    if (!selected) return;
-    addMoodLog({
-      _id: Date.now().toString(),
-      userId: 'current-user',
-      mood: selected,
-      note: note.trim() || undefined,
-      timestamp: Date.now(),
-    });
-    router.back();
+  const handleSave = async () => {
+    if (!selected || !convexUserId) return;
+    try {
+      await addMoodLog({
+        userId: convexUserId as Id<"users">,
+        mood: selected,
+        note: note.trim() || undefined,
+      });
+      router.back();
+    } catch (error) {
+      console.error('Failed to save mood:', error);
+      alert('Gagal menyimpan data mood.');
+    }
   };
 
   return (

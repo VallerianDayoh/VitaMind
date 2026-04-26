@@ -5,6 +5,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { Button } from '../../components/ui/Button';
 import { Colors, Typography, Spacing } from '../../constants/theme';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { useAuthStore } from '../../store/authStore';
+import { Id } from '../../convex/_generated/dataModel';
 
 const ACTIVITIES = [
   { key: 'exercise', label: 'Olahraga', icon: '🏋️' },
@@ -16,17 +20,30 @@ const ACTIVITIES = [
 
 export default function ActivityCheckinScreen() {
   const router = useRouter();
+  const convexUserId = useAuthStore((s) => s.convexUserId);
+  const addActivityLog = useMutation(api.activityLogs.add);
   const [selected, setSelected] = useState<string | null>(null);
   const [durationStr, setDurationStr] = useState('');
 
   const duration = parseInt(durationStr) || 0;
   const canSave = !!selected && duration > 0;
 
-  const handleSave = () => {
-    // In the future, save to dataStore
+  const handleSave = async () => {
+    if (!convexUserId) return;
     const label = ACTIVITIES.find((a) => a.key === selected)?.label ?? selected;
-    alert(`${label} selama ${duration} menit berhasil dicatat!`);
-    router.back();
+    if (!label) return;
+    try {
+      await addActivityLog({
+        userId: convexUserId as Id<"users">,
+        activity: label,
+        durationMinutes: duration,
+      });
+      alert(`${label} selama ${duration} menit berhasil dicatat!`);
+      router.back();
+    } catch (error) {
+      console.error('Failed to save activity log:', error);
+      alert('Gagal menyimpan catatan aktivitas.');
+    }
   };
 
   return (
