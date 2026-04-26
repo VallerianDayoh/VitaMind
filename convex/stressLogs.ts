@@ -6,12 +6,14 @@ export const add = mutation({
     userId: v.id("users"),
     level: v.number(),
     hasDeadline: v.boolean(),
+    note: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("stressLogs", {
       userId: args.userId,
       level: args.level,
       hasDeadline: args.hasDeadline,
+      note: args.note,
       timestamp: Date.now(),
     });
   },

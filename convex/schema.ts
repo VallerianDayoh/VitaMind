@@ -44,6 +44,7 @@ export default defineSchema({
     userId: v.id("users"),
     level: v.number(),
     hasDeadline: v.boolean(),
+    note: v.optional(v.string()),
     timestamp: v.number(),
   }).index("by_user", ["userId"]),
 

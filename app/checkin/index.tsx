@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,12 @@ import {
   Switch,
   Alert,
 } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -82,6 +88,26 @@ export default function UnifiedCheckinScreen() {
   // Stress state
   const [stressLevel, setStressLevel] = useState<number | null>(null);
   const [hasDeadline, setHasDeadline] = useState(false);
+  const [deadlineContext, setDeadlineContext] = useState('');
+
+  // Reanimated values for deadline context expansion
+  const deadlineHeight = useSharedValue(0);
+  const deadlineOpacity = useSharedValue(0);
+
+  const DEADLINE_INPUT_HEIGHT = 52;
+
+  const handleToggleDeadline = useCallback((value: boolean) => {
+    setHasDeadline(value);
+    const timing = { duration: 280, easing: Easing.out(Easing.cubic) };
+    deadlineHeight.value = withTiming(value ? DEADLINE_INPUT_HEIGHT : 0, timing);
+    deadlineOpacity.value = withTiming(value ? 1 : 0, { duration: 220, easing: Easing.out(Easing.ease) });
+  }, [deadlineHeight, deadlineOpacity]);
+
+  const deadlineAnimStyle = useAnimatedStyle(() => ({
+    height: deadlineHeight.value,
+    opacity: deadlineOpacity.value,
+    overflow: 'hidden',
+  }));
 
   // Activity state
   const [activity, setActivity] = useState<string | null>(null);
@@ -129,6 +155,7 @@ export default function UnifiedCheckinScreen() {
           userId: uid,
           level: stressLevel,
           hasDeadline,
+          note: deadlineContext.trim() || undefined,
         }));
       }
       if (activity && activityDuration) {
@@ -296,11 +323,24 @@ export default function UnifiedCheckinScreen() {
             </View>
             <Switch
               value={hasDeadline}
-              onValueChange={setHasDeadline}
+              onValueChange={handleToggleDeadline}
               trackColor={{ false: Colors.border, true: Colors.primary + '80' }}
               thumbColor={hasDeadline ? Colors.primary : '#F4F3F4'}
             />
           </View>
+
+          {/* Progressive Disclosure: Deadline Context Input */}
+          <Animated.View style={[styles.deadlineInputWrap, deadlineAnimStyle]}>
+            <TextInput
+              style={styles.deadlineInput}
+              placeholder="Mata kuliah/kegiatan apa? (Opsional)"
+              placeholderTextColor={Colors.textSecondary}
+              value={deadlineContext}
+              onChangeText={setDeadlineContext}
+              returnKeyType="done"
+              editable={hasDeadline}
+            />
+          </Animated.View>
         </Card>
 
         {/* ─── 4. AKTIVITAS ───────────────────────────── */}
@@ -546,6 +586,21 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   toggleSub: { fontSize: Typography.sizes.xs, color: Colors.textSecondary, marginTop: 2 },
+
+  deadlineInputWrap: {
+    marginTop: Spacing.sm,
+  },
+  deadlineInput: {
+    backgroundColor: Colors.background,
+    borderRadius: 10,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
+    fontSize: Typography.sizes.sm,
+    color: Colors.text,
+    borderWidth: 1,
+    borderColor: Colors.primary + '60',
+    height: 44,
+  },
 
   // ── Activity ─────────────────────────────────────────
   activityScroll: { marginBottom: Spacing.md },
