@@ -20,12 +20,12 @@ export const chat = action({
     conversationHistory: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("API Key belum diset di Convex environment!");
 
     const messages = [];
 
-    // System instruction
+    // Add system instruction
     messages.push({
       role: "system",
       content: VITA_SYSTEM_PROMPT
@@ -50,7 +50,7 @@ export const chat = action({
     });
 
     const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
+      "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
       {
         method: "POST",
         headers: {
@@ -58,10 +58,10 @@ export const chat = action({
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant", // Groq fast model
+          model: "models/gemini-2.5-flash-lite",
           messages,
           temperature: 0.8,
-          max_tokens: 280,
+          max_tokens: 800,
           top_p: 0.9
         }),
       }
@@ -70,12 +70,12 @@ export const chat = action({
     const data = await response.json();
 
     if (data.error) {
-      console.error("Groq Error:", data.error);
+      console.error("Gemini Error:", data.error);
       return "Maaf, Vita sedang mengalami gangguan teknis. Coba lagi nanti ya 💛";
     }
 
     if (!data.choices || data.choices.length === 0 || !data.choices[0].message) {
-      console.error("Invalid response:", JSON.stringify(data));
+      console.error("Invalid response from Gemini:", JSON.stringify(data));
       return "Maaf, aku belum bisa memproses pesanmu saat ini. Coba ulangi lagi ya 🌱";
     }
 
@@ -91,7 +91,7 @@ export const generateInsight = action({
     stressLogs: v.array(v.any()),
   },
   handler: async (ctx, args) => {
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("API Key belum diset!");
 
     // Optimalisasi Payload Data: Hanya ambil core value
@@ -104,7 +104,7 @@ export const generateInsight = action({
     const userPrompt = `Tugasmu: Buat analisis mingguan dari data check-in user bernama ${args.userName}. Gunakan gaya bahasa Indonesia yang santai, luwes, dan kasual (boleh pakai kata 'aku', 'kamu', 'banget', 'ya', 'sih', dll) layaknya ngobrol dengan teman baik atau mentor yang peduli. JANGAN gunakan bahasa baku atau terlalu kaku.
 
 PENTING - FORMAT OUTPUT:
-- JANGAN gunakan format markdown seperti bintang/asterisk (**teks**) sama sekali. Hasilkan teks biasa saja (plaintext).
+- JANGAN gunakan format markdown seperti bintang/asterisk (contoh *kata* atau **kata**) sama sekali. Hasilkan teks biasa saja (plaintext).
 - JANGAN buat subjudul atau poin-poin kaku. Mengalirlah seperti sedang mengobrol santai.
 - Tulis dalam 2 atau 3 paragraf berisi 2-3 kalimat yang dipisahkan oleh 1 baris kosong (Enter/Newline).
 - Gunakan 1 atau 2 emoji yang pas di setiap paragraf agar terasa lebih peduli.
@@ -122,7 +122,7 @@ Data 7 hari terakhir (Berurutan):
 Tulis HANYA paragraf analisisnya saja, langsung masuk ke sapaan dan poin utamanya.`;
 
     const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
+      "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
       {
         method: "POST",
         headers: {
@@ -130,20 +130,20 @@ Tulis HANYA paragraf analisisnya saja, langsung masuk ke sapaan dan poin utamany
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant", // Groq fast model
+          model: "models/gemini-2.5-flash-lite",
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt }
           ],
           temperature: 0.7,
-          max_tokens: 350
+          max_tokens: 800
         }),
       }
     );
 
     const data = await response.json();
     if (data.error || !data.choices || data.choices.length === 0) {
-      console.error("Groq Insight Error:", data.error || data);
+      console.error("Gemini Insight Error:", data.error || data);
       return "Data belum cukup untuk dianalisis minggu ini. Tetap semangat dan usahakan check-in rutin ya!";
     }
 
